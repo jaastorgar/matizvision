@@ -25,19 +25,32 @@ exports.registerUser = async (req, res) => {
 
 // Iniciar sesión de usuario
 exports.loginUser = async (req, res) => {
-  const { email, password } = req.body;
   try {
+    const { email, password } = req.body;
+
+    console.log("Datos recibidos en la solicitud:", { email, password }); // Añade este log para ver los datos recibidos
+
+    // Busca el usuario por correo electrónico
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!user) {
+      console.log("Usuario no encontrado"); // Añade este log para ver si el usuario existe
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: 'Contraseña incorrecta' });
+    // Verifica la contraseña
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      console.log("Contraseña incorrecta"); // Añade este log para verificar la contraseña
+      return res.status(401).json({ message: 'Contraseña incorrecta' });
+    }
 
-    // Generar el token
-    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.SECRET_KEY, { expiresIn: '1h' });
-    res.json({ token, user });
+    // Genera un token JWT
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.json({ token });
   } catch (error) {
-    res.status(500).json({ error: 'Error al iniciar sesión' });
+    console.error('Error en el inicio de sesión:', error); // Esto mostrará detalles del error en la consola
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
 

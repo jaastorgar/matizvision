@@ -1,16 +1,21 @@
 // src/pages/Perfil.js
 import React, { useEffect, useState } from 'react';
-import { getUserProfile } from '../services/authService';
+import { getUserProfile, updateUserProfile } from '../services/authService';
 import styled from 'styled-components';
 
 const Perfil = () => {
   const [user, setUser] = useState(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUser, setEditedUser] = useState({});
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         const userData = await getUserProfile();
         setUser(userData);
+        setEditedUser(userData);
+        setNotificationsEnabled(userData.notificationsEnabled || false);
       } catch (error) {
         console.error('Error al cargar el perfil del usuario');
       }
@@ -18,6 +23,34 @@ const Perfil = () => {
 
     fetchUserProfile();
   }, []);
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditedUser({ ...editedUser, [name]: value });
+  };
+
+  const handleNotificationChange = (e) => {
+    setNotificationsEnabled(e.target.checked);
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      await updateUserProfile(editedUser);
+      setUser(editedUser);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error al guardar los cambios del perfil');
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    // Aquí podrías manejar la carga de la imagen al backend
+  };
 
   if (!user) {
     return <p>Cargando perfil...</p>;
@@ -27,10 +60,13 @@ const Perfil = () => {
     <PerfilContainer>
       <Header>
         <ProfilePicture src="url_de_la_foto" alt="Foto de Perfil" />
+        {isEditing ? (
+          <input type="file" onChange={handleFileChange} />
+        ) : null}
         <UserInfo>
           <UserName>{user.name}</UserName>
           <UserEmail>{user.email}</UserEmail>
-          <EditButton>Editar Perfil</EditButton>
+          {!isEditing && <EditButton onClick={handleEditClick}>Editar Perfil</EditButton>}
         </UserInfo>
       </Header>
 
@@ -38,27 +74,44 @@ const Perfil = () => {
         <SectionTitle>Información Básica</SectionTitle>
         <InfoRow>
           <InfoLabel>Correo:</InfoLabel>
-          <InfoValue>{user.email}</InfoValue>
+          {isEditing ? (
+            <input
+              type="text"
+              name="email"
+              value={editedUser.email}
+              onChange={handleInputChange}
+            />
+          ) : (
+            <InfoValue>{user.email}</InfoValue>
+          )}
         </InfoRow>
         <InfoRow>
           <InfoLabel>Teléfono:</InfoLabel>
-          <InfoValue>{user.phone}</InfoValue>
-        </InfoRow>
-        <InfoRow>
-          <InfoLabel>RUT:</InfoLabel>
-          <InfoValue>{user.rut}-{user.dv}</InfoValue>
+          {isEditing ? (
+            <input
+              type="text"
+              name="phone"
+              value={editedUser.phone}
+              onChange={handleInputChange}
+            />
+          ) : (
+            <InfoValue>{user.phone}</InfoValue>
+          )}
         </InfoRow>
       </Section>
 
-      <Section>
-        <SectionTitle>Cambio de Contraseña</SectionTitle>
-        <ChangePasswordButton>Cambiar Contraseña</ChangePasswordButton>
-      </Section>
+      {isEditing && (
+        <SaveButton onClick={handleSaveChanges}>Guardar Cambios</SaveButton>
+      )}
 
       <Section>
         <SectionTitle>Gestión de Notificaciones</SectionTitle>
         <NotificationToggle>
-          <input type="checkbox" checked={true} />
+          <input
+            type="checkbox"
+            checked={notificationsEnabled}
+            onChange={handleNotificationChange}
+          />
           <label>Recibir Notificaciones</label>
         </NotificationToggle>
       </Section>
@@ -113,6 +166,20 @@ const EditButton = styled.button`
   }
 `;
 
+const SaveButton = styled.button`
+  background-color: #006400;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-top: 10px;
+
+  &:hover {
+    background-color: #004c33;
+  }
+`;
+
 const Section = styled.div`
   margin-bottom: 20px;
   padding: 15px;
@@ -137,19 +204,6 @@ const InfoLabel = styled.span`
 
 const InfoValue = styled.span`
   color: #555;
-`;
-
-const ChangePasswordButton = styled.button`
-  background-color: #006400;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  cursor: pointer;
-  border-radius: 4px;
-
-  &:hover {
-    background-color: #004c33;
-  }
 `;
 
 const NotificationToggle = styled.div`

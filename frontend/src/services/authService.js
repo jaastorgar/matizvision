@@ -2,6 +2,8 @@
 import axios from 'axios';
 import api from '../utils/axios';
 
+const API_URL = 'http://localhost:5000/api/users';
+
 // Función para registrar un nuevo usuario
 export const registerUser = async (userData) => {
   const response = await api.post('/users/register', userData);
@@ -28,16 +30,18 @@ export const isAuthenticated = () => {
 
 // Función para obtener el perfil del usuario autenticado
 export const getUserProfile = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await axios.get('http://localhost:5000/api/users/me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error al obtener el perfil del usuario:', error);
-    throw error;
-  }
+  const token = localStorage.getItem('token');
+  const response = await axios.get(`${API_URL}/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+// Función para actualizar el perfil del usuario autenticado
+export const updateUserProfile = async (updatedData) => {
+  const token = localStorage.getItem('token');
+  const response = await axios.put(`${API_URL}/me`, updatedData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
 };
