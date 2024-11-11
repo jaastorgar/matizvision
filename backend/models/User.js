@@ -3,34 +3,39 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const User = sequelize.define('User', {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  rut: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  dv: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      len: [9, 9] // Asegura que el número de teléfono tenga 9 caracteres
+    }
   },
   email: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
-    validate: {
-      isEmail: true,
-    },
   },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   role: {
-    type: DataTypes.ENUM('cliente', 'trabajador'),
-    allowNull: false,
-  },
-}, {
-  tableName: 'users',
-  timestamps: true, // createdAt y updatedAt
+    type: DataTypes.STRING,
+    defaultValue: 'cliente',
+  }
 });
 
 module.exports = User;

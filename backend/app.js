@@ -1,11 +1,16 @@
 // app.js
 const express = require('express');
+const cors = require('cors'); // Importa cors
 const sequelize = require('./config/database'); // Importa la conexión de la base de datos
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 
 const app = express();
+
+// Habilitar CORS para permitir solicitudes desde http://localhost:3000
+app.use(cors({ origin: 'http://localhost:3000' }));
+
 app.use(express.json());
 
 app.use('/api/users', userRoutes);

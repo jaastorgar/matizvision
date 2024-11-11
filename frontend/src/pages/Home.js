@@ -6,35 +6,35 @@ import styled from 'styled-components';
 const Home = () => {
   return (
     <HomeContainer>
-      <h1>Bienvenido a Matiz Vision</h1>
-      <p>Tu óptica de confianza, comprometida con tu salud visual y estilo.</p>
+      <Title>Bienvenido a Matiz Vision</Title>
+      <Description>Tu óptica de confianza, comprometida con tu salud visual y estilo.</Description>
 
       <Section>
-        <h2>Nuestros Servicios</h2>
+        <SectionTitle>Nuestros Servicios</SectionTitle>
         <p>Ofrecemos una variedad de servicios para mejorar y cuidar tu visión.</p>
         <ul>
           <li>Exámenes de la vista completos</li>
           <li>Asesoría personalizada para elegir tus lentes</li>
           <li>Ajustes y reparaciones de monturas</li>
         </ul>
-        <Link to="/servicios">Ver más servicios</Link>
+        <StyledLink to="/servicios">Ver más servicios</StyledLink>
       </Section>
 
       <Section>
-        <h2>Productos Destacados</h2>
+        <SectionTitle>Productos Destacados</SectionTitle>
         <p>Descubre nuestras colecciones de lentes de alta calidad y estilo.</p>
         <ul>
           <li>Lentes de sol con protección UV</li>
           <li>Monturas para lentes de lectura</li>
           <li>Lentes de contacto de diferentes tipos</li>
         </ul>
-        <Link to="/productos">Ver todos los productos</Link>
+        <StyledLink to="/productos">Ver todos los productos</StyledLink>
       </Section>
 
       <Section>
-        <h2>Reserva tu Cita</h2>
+        <SectionTitle>Reserva tu Cita</SectionTitle>
         <p>Agenda fácilmente una cita con nosotros para un examen visual.</p>
-        <Link to="/citas">Reservar cita</Link>
+        <StyledLink to="/citas">Reservar cita</StyledLink>
       </Section>
     </HomeContainer>
   );
@@ -45,43 +45,39 @@ const HomeContainer = styled.div`
   padding: 20px;
   text-align: center;
   color: #333;
+  background-color: #f2f2f2;
+`;
+
+const Title = styled.h1`
+  color: #2f4f4f;
+`;
+
+const Description = styled.p`
+  color: #4d4d4d;
+  margin-bottom: 20px;
 `;
 
 const Section = styled.section`
   margin: 20px 0;
   padding: 15px;
-  background-color: #f9f9f9;
+  background-color: #e0e0e0;
   border-radius: 8px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+`;
 
-  h2 {
-    color: #2d72d9; /* Puedes ajustar este color para que coincida con tu esquema */
-  }
+const SectionTitle = styled.h2`
+  color: #006400;
+`;
 
-  p {
-    margin: 10px 0;
-  }
+const StyledLink = styled(Link)`
+  display: inline-block;
+  margin-top: 10px;
+  color: #006400;
+  text-decoration: none;
+  font-weight: bold;
 
-  ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  li {
-    margin: 5px 0;
-  }
-
-  a {
-    display: inline-block;
-    margin-top: 10px;
-    color: #2d72d9;
-    text-decoration: none;
-    font-weight: bold;
-
-    &:hover {
-      text-decoration: underline;
-    }
+  &:hover {
+    text-decoration: underline;
   }
 `;
 

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -11,10 +11,13 @@ const PrivateRoute = ({ children }) => {
   return isAuthenticated() ? children : <Navigate to="/login" />;
 };
 
-function App() {
+const AppContent = () => {
+  const location = useLocation();
+  const hideNavbarFooter = location.pathname === '/login' || location.pathname === '/register';
+
   return (
-    <Router>
-      <Navbar /> {/* El Navbar se mostrará en todas las páginas */}
+    <>
+      {!hideNavbarFooter && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -28,7 +31,15 @@ function App() {
           }
         />
       </Routes>
-      <Footer /> {/* El Footer se mostrará en todas las páginas */}
+      {!hideNavbarFooter && <Footer />}
+    </>
+  );
+};
+
+function App() {
+  return (
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <AppContent />
     </Router>
   );
 }

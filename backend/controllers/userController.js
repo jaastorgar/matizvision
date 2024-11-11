@@ -5,10 +5,18 @@ const User = require('../models/User');
 
 // Registrar un nuevo usuario
 exports.registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, rut, dv, phone, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashedPassword, role });
+    const user = await User.create({
+      name,
+      rut,
+      dv,
+      phone,
+      email,
+      password: hashedPassword,
+      role: 'cliente',
+    });
     res.status(201).json(user);
   } catch (error) {
     res.status(500).json({ error: 'Error al registrar usuario' });
