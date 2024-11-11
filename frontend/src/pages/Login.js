@@ -1,17 +1,18 @@
+// pages/Login.js
 import React, { useState } from 'react';
 import { loginUser } from '../services/authService';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await loginUser({ email, password });
-      history.push('/'); // Redirige a la página principal tras iniciar sesión
+      navigate('/'); // Redirige a la página principal tras iniciar sesión
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
     }

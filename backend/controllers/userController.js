@@ -33,6 +33,49 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+// Obtener todos los usuarios (protegido)
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+};
+
+// Actualizar un usuario por ID (protegido)
+exports.updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { name, email, role } = req.body;
+  try {
+    const user = await User.findByPk(id);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.role = role || user.role;
+    await user.save();
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al actualizar usuario' });
+  }
+};
+
+// Eliminar un usuario por ID (protegido)
+exports.deleteUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findByPk(id);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    await user.destroy();
+    res.json({ message: 'Usuario eliminado exitosamente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar usuario' });
+  }
+};
+
 // Middleware para verificar el token
 exports.verifyToken = (req, res, next) => {
   const token = req.headers['authorization'];

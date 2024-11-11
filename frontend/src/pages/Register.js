@@ -1,19 +1,20 @@
+// src/pages/Register.js
 import React, { useState } from 'react';
 import { registerUser } from '../services/authService';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('cliente');
-  const history = useHistory();
+  const navigate = useNavigate(); // Usar useNavigate en lugar de useHistory
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
       await registerUser({ name, email, password, role });
-      history.push('/login'); // Redirige a la página de login tras registrarse
+      navigate('/login'); // Redirige a la página de login tras registrarse
     } catch (error) {
       console.error('Error al registrarse:', error);
     }
