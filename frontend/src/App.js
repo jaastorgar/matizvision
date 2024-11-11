@@ -1,3 +1,4 @@
+// src/App.js
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -13,7 +14,8 @@ const PrivateRoute = ({ children }) => {
 
 const AppContent = () => {
   const location = useLocation();
-  const hideNavbarFooter = location.pathname === '/login' || location.pathname === '/register';
+  // Oculta Navbar y Footer en /login, /register, y /perfil
+  const hideNavbarFooter = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/perfil';
 
   return (
     <>

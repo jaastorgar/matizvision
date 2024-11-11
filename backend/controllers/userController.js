@@ -96,3 +96,18 @@ exports.verifyToken = (req, res, next) => {
     next();
   });
 };
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['name', 'email', 'rut', 'dv', 'phone']
+    });
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el perfil del usuario' });
+  }
+};
