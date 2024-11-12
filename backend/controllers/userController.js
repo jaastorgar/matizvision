@@ -124,3 +124,23 @@ exports.getUserProfile = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener el perfil del usuario' });
   }
 };
+
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // O la forma en que obtienes el ID del usuario
+    console.log("ID del usuario autenticado:", userId);
+    console.log("Datos recibidos para la actualización:", req.body);
+
+    // Realiza la actualización (asegúrate de que tu lógica esté correcta)
+    const updatedUser = await User.update(req.body, { where: { id: userId } });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    res.json({ message: 'Perfil actualizado correctamente', updatedUser });
+  } catch (error) {
+    console.error('Error al actualizar el perfil:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};

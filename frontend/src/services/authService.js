@@ -31,9 +31,15 @@ export const isAuthenticated = () => {
 // Función para obtener el perfil del usuario autenticado
 export const getUserProfile = async () => {
   const token = localStorage.getItem('token');
+  if (!token) {
+    console.error('No token found in localStorage');
+    throw new Error('No token found');
+  }
+  
   const response = await axios.get(`${API_URL}/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  
   return response.data;
 };
 

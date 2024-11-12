@@ -6,8 +6,11 @@ import styled from 'styled-components';
 const Home = () => {
   return (
     <HomeContainer>
-      <Title>Bienvenido a Matiz Vision</Title>
-      <Description>Tu óptica de confianza, comprometida con tu salud visual y estilo.</Description>
+      <HeroSection>
+        <HeroText>Bienvenido a Matiz Vision</HeroText>
+        <HeroSubText>Tu óptica de confianza, comprometida con tu salud visual y estilo.</HeroSubText>
+        <HeroButton to="/citas">Reservar Cita</HeroButton>
+      </HeroSection>
 
       <Section>
         <SectionTitle>Nuestros Servicios</SectionTitle>
@@ -48,13 +51,32 @@ const HomeContainer = styled.div`
   background-color: #f2f2f2;
 `;
 
-const Title = styled.h1`
-  color: #2f4f4f;
+const HeroSection = styled.section`
+  background-image: url('ruta/a/imagen-de-fondo.jpg');
+  background-size: cover;
+  background-position: center;
+  text-align: center;
+  padding: 80px 20px;
+  color: #fff;
 `;
 
-const Description = styled.p`
-  color: #4d4d4d;
-  margin-bottom: 20px;
+const HeroText = styled.h1`
+  font-size: 36px;
+  color: #00cc66;
+`;
+
+const HeroSubText = styled.p`
+  font-size: 20px;
+  margin-top: 10px;
+`;
+
+const HeroButton = styled(Link)`
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #00cc66;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
 `;
 
 const Section = styled.section`

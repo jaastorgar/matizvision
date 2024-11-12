@@ -1,4 +1,3 @@
-// models/User.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
@@ -35,7 +34,11 @@ const User = sequelize.define('User', {
   role: {
     type: DataTypes.STRING,
     defaultValue: 'cliente',
-  }
+  },
+  image: { // Nuevo campo para la imagen de perfil
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = User;

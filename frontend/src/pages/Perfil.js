@@ -48,8 +48,7 @@ const Perfil = () => {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    // Aquí podrías manejar la carga de la imagen al backend
+    // const file = e.target.files[0];
   };
 
   if (!user) {
