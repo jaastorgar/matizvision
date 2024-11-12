@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Perfil from './pages/Perfil';
+import Productos from './pages/Productos'; // Asegúrate de importar Productos.js
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { isAuthenticated } from './services/authService';
@@ -14,7 +15,6 @@ const PrivateRoute = ({ children }) => {
 
 const AppContent = () => {
   const location = useLocation();
-  // Oculta Navbar y Footer en /login, /register, y /perfil
   const hideNavbarFooter = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/perfil';
 
   return (
@@ -32,6 +32,7 @@ const AppContent = () => {
             </PrivateRoute>
           }
         />
+        <Route path="/productos" element={<Productos />} /> {/* Ruta para Productos */}
       </Routes>
       {!hideNavbarFooter && <Footer />}
     </>
