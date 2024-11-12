@@ -24,7 +24,6 @@ const Productos = () => {
         {products.map((product) => (
           <div key={product.id} className="producto-card">
             <div className="producto-image">
-              {/* Suponiendo que tienes una imagen de producto en product.image */}
               <img src={product.image} alt={product.name} />
             </div>
             <h3>{product.name}</h3>
@@ -37,7 +36,7 @@ const Productos = () => {
       </div>
 
       {/* CSS inline para el estilo */}
-      <style jsx>{`
+      <style>{`
         .productos-container {
           text-align: center;
           padding: 2rem;

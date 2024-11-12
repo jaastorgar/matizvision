@@ -1,7 +1,6 @@
-// app.js
 const express = require('express');
-const cors = require('cors'); // Importa cors
-const sequelize = require('./config/database'); // Importa la conexión de la base de datos
+const cors = require('cors');
+const sequelize = require('./config/database');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
