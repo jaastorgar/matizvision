@@ -1,3 +1,4 @@
+// Home.js
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -27,7 +28,7 @@ const Home = () => {
           <CardText>
             Explora nuestra selección de lentes y accesorios de alta calidad.
           </CardText>
-          <CardButton to="/productos">Ver Productos</CardButton> {/* Enlace hacia la página de productos */}
+          <CardButton to="/productos">Ver Productos</CardButton>
         </Card>
 
         <Card>

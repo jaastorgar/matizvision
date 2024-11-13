@@ -1,4 +1,3 @@
-// src/components/Navbar.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -98,11 +97,13 @@ const AuthContainer = styled.div`
 
 const ProfileButton = styled.button`
   background: none;
-  border: none;
+  border: 2px solid #fff;
   color: #fff;
   font-size: 16px;
   cursor: pointer;
   font-weight: bold;
+  padding: 8px 15px;
+  border-radius: 20px;
 
   &:hover {
     color: #00cc66;
@@ -111,13 +112,13 @@ const ProfileButton = styled.button`
 
 const AuthOptions = styled.div`
   position: absolute;
-  top: 40px;
+  top: 50px;
   right: 0;
   background-color: #f9f9f9;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
   padding: 10px;
   border-radius: 8px;
-  min-width: 180px;
+  min-width: 200px;
   display: flex;
   flex-direction: column;
 `;
@@ -125,10 +126,13 @@ const AuthOptions = styled.div`
 const AuthLink = styled(Link)`
   color: #006400;
   text-decoration: none;
-  padding: 8px 0;
-  font-size: 14px;
+  padding: 10px;
+  font-size: 15px;
+  border-radius: 5px;
+  transition: background 0.3s ease;
 
   &:hover {
+    background-color: #e6f4ea;
     color: #004c33;
   }
 `;
@@ -136,13 +140,17 @@ const AuthLink = styled(Link)`
 const LogoutButton = styled.button`
   background: none;
   border: none;
-  color: #006400;
+  color: #d9534f;
   cursor: pointer;
-  padding: 8px 0;
-  font-size: 14px;
+  padding: 10px;
+  font-size: 15px;
+  text-align: left;
+  transition: background 0.3s ease;
+  border-radius: 5px;
 
   &:hover {
-    color: #004c33;
+    background-color: #f8d7da;
+    color: #a94442;
   }
 `;
 

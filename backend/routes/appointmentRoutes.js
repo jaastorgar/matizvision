@@ -1,11 +1,12 @@
-// appointmentRoutes.js
 const express = require('express');
-const appointmentController = require('../controllers/appointmentController');
 const router = express.Router();
+const appointmentController = require('../controllers/appointmentController');
+const verifyToken = require('../middleware/authMiddleware');
 
-router.post('/', appointmentController.createAppointment);
-router.get('/', appointmentController.getAppointments);
-router.put('/:id', appointmentController.updateAppointment);
-router.delete('/:id', appointmentController.deleteAppointment);
+// Ruta para crear una cita (solo autenticados)
+router.post('/create', verifyToken, appointmentController.createAppointment);
+
+// Ruta para obtener citas de un usuario autenticado
+router.get('/user', verifyToken, appointmentController.getUserAppointments);
 
 module.exports = router;

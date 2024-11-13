@@ -4,7 +4,9 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Perfil from './pages/Perfil';
-import Productos from './pages/Productos'; // Asegúrate de importar Productos.js
+import Productos from './pages/Productos';
+import Citas from './pages/Citas';
+import AgregarProducto from './pages/AgregarProducto';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { isAuthenticated } from './services/authService';
@@ -32,7 +34,9 @@ const AppContent = () => {
             </PrivateRoute>
           }
         />
-        <Route path="/productos" element={<Productos />} /> {/* Ruta para Productos */}
+        <Route path="/productos" element={<Productos />} />
+        <Route path="/citas" element={<Citas />} />
+        <Route path="/agregarproduc" element={<AgregarProducto />} />
       </Routes>
       {!hideNavbarFooter && <Footer />}
     </>

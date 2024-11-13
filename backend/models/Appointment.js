@@ -1,7 +1,7 @@
 // models/Appointment.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const User = require('./User'); // Importa el modelo User para establecer relaciones
+const User = require('./User');
 
 const Appointment = sequelize.define('Appointment', {
   id: {
