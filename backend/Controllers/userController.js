@@ -2,6 +2,7 @@ const User = require('../models/User');
 const path = require('path');
 const fs = require('fs');
 
+// Subir foto del usuario
 exports.uploadPhoto = async (req, res) => {
   try {
     const userId = req.params.id; // ID del usuario desde la URL

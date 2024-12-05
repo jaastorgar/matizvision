@@ -16,17 +16,15 @@ app.use(cors());
 app.use(bodyParser.json()); 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-/*
 // Rutas (importar las rutas principales)
-const userRoutes = require('./routes/userRoutes');
-const productRoutes = require('./routes/productRoutes');
-const appointmentRoutes = require('./routes/appointmentRoutes');
+const userRoutes = require('./Routes/userRoutes');
+const productRoutes = require('./Routes/productRoutes');
+const appointmentRoutes = require('./Routes/appointmentRoutes');
 
 // Rutas del API
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/appointments', appointmentRoutes);
-*/
 
 // Sincronizar la base de datos con Sequelize
 sequelize

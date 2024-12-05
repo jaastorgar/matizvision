@@ -2,6 +2,7 @@ const Product = require('../models/Product');
 const path = require('path');
 const fs = require('fs');
 
+// Subir foto del producto
 exports.uploadPhoto = async (req, res) => {
   try {
     const productId = req.params.id; // ID del producto desde la URL
