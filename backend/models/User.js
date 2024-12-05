@@ -57,4 +57,6 @@ const User = sequelize.define('User', {
   },
 });
 
+User.hasMany(Appointment, { foreignKey: 'userId', onDelete: 'CASCADE' });
+
 module.exports = User;

@@ -3,12 +3,14 @@ const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/users'); // Carpeta donde se guardarán las fotos
+    // Selección dinámica del destino según el tipo de entidad
+    const folder = req.params.type === 'product' ? 'uploads/products' : 'uploads/users';
+    cb(null, folder); // Carpeta de destino
   },
   filename: (req, file, cb) => {
-    const userId = req.params.id; // Usamos el ID del usuario para nombrar el archivo
+    const entityId = req.params.id; // Usamos el ID del usuario o producto
     const uniqueSuffix = `${Date.now()}${path.extname(file.originalname)}`;
-    cb(null, `${userId}_${uniqueSuffix}`);
+    cb(null, `${entityId}_${uniqueSuffix}`);
   },
 });
 

@@ -3,6 +3,7 @@ const dotenv = require('dotenv'); // Cargar variables de entorno
 const cors = require('cors'); // Manejo de CORS
 const bodyParser = require('body-parser'); // Parsear JSON
 const sequelize = require('./config/database'); // Configuración de la base de datos
+const path = require('path');
 
 // Cargar las variables de entorno desde .env
 dotenv.config();
