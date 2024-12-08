@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
+import AuthContext from '../context/authContext';
 
-const Navbar = ({ isLoggedIn }) => {
+const Navbar = () => {
+  const { isLoggedIn, user, logout } = useContext(AuthContext);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   const handleMouseEnter = () => setIsDropdownVisible(true);
@@ -30,7 +32,7 @@ const Navbar = ({ isLoggedIn }) => {
             onMouseLeave={handleMouseLeave}
             style={styles.dropdownContainer}
           >
-            <span style={styles.link}>Menú</span>
+            <span style={styles.link}>Hola, {user.name}</span>
             {isDropdownVisible && (
               <ul style={styles.dropdown}>
                 <li>
@@ -44,6 +46,9 @@ const Navbar = ({ isLoggedIn }) => {
                 </li>
                 <li>
                   <Link to="/client-appointments" style={styles.dropdownLink}>Citas Realizadas</Link>
+                </li>
+                <li>
+                  <span onClick={logout} style={styles.dropdownLink}>Cerrar Sesión</span>
                 </li>
               </ul>
             )}

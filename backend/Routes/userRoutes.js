@@ -1,9 +1,11 @@
 const express = require('express');
 const upload = require('../middleware/upload');
 const userController = require('../Controllers/userController');
+const { login } = require('../Controllers/authController');
 
 const router = express.Router();
 
+router.post('/login', login);
 // Crear un usuario
 router.post('/', userController.createUser);
 

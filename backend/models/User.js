@@ -13,26 +13,35 @@ const User = sequelize.define('User', {
   rut: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
   },
   dv: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   age: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
   },
   birthDate: {
     type: DataTypes.DATEONLY,
-    allowNull: false,
+    allowNull: true,
   },
   photo: {
     type: DataTypes.STRING,
-    defaultValue: '/uploads/users/default.jpg',
+    allowNull: true,
   },
   role: {
     type: DataTypes.STRING,
+    allowNull: false,
     defaultValue: 'cliente',
   },
 });

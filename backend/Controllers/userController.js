@@ -1,17 +1,49 @@
 const User = require('../models/User');
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
+
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Busca el usuario por email
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Verifica la contraseña
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Contraseña incorrecta' });
+    }
+
+    // Genera un token JWT
+    const token = jwt.sign({ id: user.id }, 'tu_secreto', { expiresIn: '1h' });
+
+    res.status(200).json({ token, user });
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error);
+    res.status(500).json({ message: 'Error al iniciar sesión', error });
+  }
+};
 
 // Crear un usuario
 exports.createUser = async (req, res) => {
   try {
-    const { name, lastName, rut, dv, age, birthDate, role } = req.body;
+    const { name, lastName, rut, dv, email, password, age, birthDate, role } = req.body;
+
+    // Hashea la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name,
       lastName,
       rut,
       dv,
+      email,
+      password: hashedPassword,
       age,
       birthDate,
       photo: '/uploads/users/default.jpg', // Foto predeterminada
