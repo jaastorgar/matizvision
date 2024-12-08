@@ -13,7 +13,7 @@ const app = express();
 // Middleware globales
 app.use(cors());
 app.use(bodyParser.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Importar asociaciones
 require('./models/Associations');
