@@ -11,12 +11,13 @@ import Profile from './pages/Profile';
 import PurchaseTracking from './pages/PurchaseTracking';
 import Purchases from './pages/Purchases';
 import ClientAppointments from './pages/ClientAppointments';
+import AdminPanel from "./pages/AdminPanel/AdminPanel";
 
 const App = () => {
   const location = useLocation();
   const isLoggedIn = false; // Simulación del estado de autenticación
 
-  const showNavbarAndFooter = !['/login', '/register'].includes(location.pathname);
+  const showNavbarAndFooter = !['/login', '/register', '/admin'].includes(location.pathname);
 
   return (
     <div>
@@ -31,6 +32,7 @@ const App = () => {
         <Route path="/purchase-tracking" element={<PurchaseTracking />} />
         <Route path="/purchases" element={<Purchases />} />
         <Route path="/client-appointments" element={<ClientAppointments />} />
+        <Route path="/admin" element={<AdminPanel />} />
       </Routes>
       {showNavbarAndFooter && <Footer />}
     </div>

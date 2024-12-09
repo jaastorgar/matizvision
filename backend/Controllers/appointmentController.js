@@ -1,5 +1,28 @@
 const Appointment = require('../models/Appointment');
+const ClientAppointments = require('../models/ClientAppointments');
 const User = require('../models/User');
+
+exports.storeClientAppointment = async (req, res) => {
+  try {
+    const { date, time, serviceType } = req.body;
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+
+    const newAppointment = await ClientAppointments.create({
+      userId: req.user.id,
+      date,
+      time,
+      serviceType,
+    });
+
+    res.status(201).json({ message: 'Cita creada con éxito', appointment: newAppointment });
+  } catch (error) {
+    console.error('Error al guardar la cita:', error);
+    res.status(500).json({ message: 'Error interno del servidor', error: error.message });
+  }
+};
 
 // Crear una nueva cita
 exports.createAppointment = async (req, res) => {

@@ -1,7 +1,11 @@
 const express = require('express');
-const appointmentController = require('../controllers/appointmentController');
+const appointmentController = require('../Controllers/appointmentController');
+const { storeClientAppointment } = require('../Controllers/appointmentController');
+const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
+
+router.post('/appointments/client', authMiddleware, storeClientAppointment);
 
 // Crear una nueva cita
 router.post('/', appointmentController.createAppointment);

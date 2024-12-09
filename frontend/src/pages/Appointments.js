@@ -15,22 +15,18 @@ const Appointments = () => {
       birthDate: '',
     },
   });
-  const isLoggedIn = false; // Determina si el cliente está registrado (ajustar según lógica)
+  const isLoggedIn = true; // Cambia esto según tu lógica de autenticación
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (isLoggedIn) {
-      setNewAppointment({ ...newAppointment, [name]: value });
+    if (name.startsWith('user.')) {
+      const field = name.split('.')[1];
+      setNewAppointment((prev) => ({
+        ...prev,
+        user: { ...prev.user, [field]: value },
+      }));
     } else {
-      const fieldGroup = name.includes('user.') ? 'user' : 'appointment';
-      const fieldName = name.replace('user.', '');
-      setNewAppointment({
-        ...newAppointment,
-        [fieldGroup]: {
-          ...newAppointment[fieldGroup],
-          [fieldName]: value,
-        },
-      });
+      setNewAppointment((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -40,7 +36,7 @@ const Appointments = () => {
 
     api
       .post(endpoint, newAppointment)
-      .then((response) => {
+      .then(() => {
         alert('Cita agendada con éxito');
         setNewAppointment({
           date: '',
@@ -54,7 +50,7 @@ const Appointments = () => {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Citas</h1>
+      <h1 style={styles.title}>Agendar Cita</h1>
       <div style={styles.formContainer}>
         <h2 style={styles.subtitle}>Agendar Cita</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
@@ -63,7 +59,6 @@ const Appointments = () => {
             name="date"
             value={newAppointment.date}
             onChange={handleInputChange}
-            placeholder="Fecha"
             required
             style={styles.input}
           />
@@ -72,7 +67,6 @@ const Appointments = () => {
             name="time"
             value={newAppointment.time}
             onChange={handleInputChange}
-            placeholder="Hora"
             required
             style={styles.input}
           />

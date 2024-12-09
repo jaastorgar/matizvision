@@ -1,29 +1,24 @@
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
+const generateToken = (user) => {
+  return jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+};
+
+// Ejemplo de inicio de sesión:
 exports.login = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
-
-    // Busca el usuario por email
     const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
-    // Verifica la contraseña
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Contraseña incorrecta' });
-    }
-
-    // Genera un token JWT
-    const token = jwt.sign({ id: user.id }, 'tu_secreto', { expiresIn: '1h' });
-
-    res.status(200).json({ token, user });
+    const token = generateToken(user);
+    res.status(200).json({ token });
   } catch (error) {
-    console.error('Error al iniciar sesión:', error);
-    res.status(500).json({ message: 'Error al iniciar sesión', error });
+    console.error('Error en login:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
