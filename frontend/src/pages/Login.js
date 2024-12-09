@@ -1,53 +1,60 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api';
+import React, { useState, useContext } from 'react';
+import axios from 'axios';
+import AuthContext from '../context/authContext';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
+  const [formData, setFormData] = useState({ email: '', password: '' });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post('/auth/login', { email, password });
+      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      login(response.data.user, response.data.token);
       alert('Inicio de sesión exitoso');
-      console.log(response.data);
-      navigate('/'); // Redirige al inicio después de iniciar sesión
+      window.location.href = '/'; // Redirige al inicio después del login
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
-      alert('Error al iniciar sesión');
+      alert('Error al iniciar sesión. Verifica tus credenciales.');
     }
   };
 
   return (
     <div style={styles.container}>
+      <h2 style={styles.title}>Iniciar Sesión</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
-        <h1 style={styles.title}>Iniciar Sesión</h1>
         <input
           type="email"
-          placeholder="Correo electrónico"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          name="email"
+          placeholder="Correo"
+          value={formData.email}
+          onChange={handleChange}
           required
           style={styles.input}
         />
         <input
           type="password"
+          name="password"
           placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={formData.password}
+          onChange={handleChange}
           required
           style={styles.input}
         />
-        <button type="submit" style={styles.button}>Ingresar</button>
+        <button type="submit" style={styles.button}>
+          Iniciar Sesión
+        </button>
         <div style={styles.links}>
-          <p onClick={() => navigate('/register')} style={styles.link}>
-            ¿No tienes cuenta? Regístrate aquí
-          </p>
-          <p onClick={() => navigate('/forgot-password')} style={styles.link}>
-            Olvidé mi contraseña
-          </p>
+          <a href="/register" style={styles.link}>
+            ¿No tienes cuenta? Regístrate
+          </a>
+          <a href="/forgot-password" style={styles.link}>
+            ¿Olvidaste tu contraseña?
+          </a>
         </div>
       </form>
     </div>
@@ -57,51 +64,54 @@ const Login = () => {
 const styles = {
   container: {
     display: 'flex',
-    justifyContent: 'center',
+    flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
     height: '100vh',
-    backgroundColor: '#f9f9f9',
-  },
-  form: {
-    width: '400px',
-    padding: '40px', // Incrementar el padding para más espacio interno
-    backgroundColor: '#fff',
-    borderRadius: '10px', // Bordes más redondeados
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#f4f4f4',
+    padding: '20px',
   },
   title: {
-    textAlign: 'center',
-    color: '#4caf50',
-    marginBottom: '25px',
-    fontWeight: 'bold',
+    fontSize: '24px',
+    marginBottom: '20px',
+    color: '#333',
+  },
+  form: {
+    width: '100%',
+    maxWidth: '400px',
+    backgroundColor: '#fff',
+    padding: '20px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
   },
   input: {
-    width: 'calc(100% - 20px)', // Asegura espacio horizontal dentro del formulario
-    padding: '12px',
-    marginBottom: '20px', // Más separación entre campos
-    borderRadius: '6px',
+    width: '100%',
+    padding: '10px',
+    margin: '10px 0',
     border: '1px solid #ccc',
-    boxSizing: 'border-box',
+    borderRadius: '4px',
+    fontSize: '16px',
   },
   button: {
     width: '100%',
-    padding: '12px',
-    backgroundColor: '#4caf50',
+    padding: '10px',
+    backgroundColor: '#4CAF50',
     color: '#fff',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '4px',
+    fontSize: '16px',
     cursor: 'pointer',
-    fontWeight: 'bold',
   },
   links: {
-    marginTop: '20px',
+    marginTop: '10px',
     textAlign: 'center',
   },
   link: {
-    color: '#4caf50',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-    fontSize: '0.9rem',
+    color: '#4CAF50',
+    textDecoration: 'none',
+    fontSize: '14px',
+    margin: '5px 0',
+    display: 'block',
   },
 };
 
