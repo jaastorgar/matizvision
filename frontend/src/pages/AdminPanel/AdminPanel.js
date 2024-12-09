@@ -1,142 +1,112 @@
-import React, { useState } from "react";
+import React from "react";
+import { Link } from "react-router-dom";
 
 const AdminPanel = () => {
-  const [activeSection, setActiveSection] = useState("Inicio");
-
-  const renderSection = () => {
-    switch (activeSection) {
-      case "Productos":
-        return <ProductsSection />;
-      case "Citas":
-        return <AppointmentsSection />;
-      case "Usuarios":
-        return <UsersSection />;
-      default:
-        return (
-          <div>
-            <h2 style={styles.sectionTitle}>Bienvenido al panel de administración</h2>
-            <p style={styles.sectionDescription}>
-              Selecciona una sección del menú para comenzar.
-            </p>
-          </div>
-        );
-    }
-  };
-
   return (
     <div style={styles.container}>
       <header style={styles.header}>
-        <h1 style={styles.title}>Panel de Administración</h1>
+        <h1 style={styles.headerText}>Panel de Administración</h1>
       </header>
       <nav style={styles.nav}>
-        <ul style={styles.navList}>
-          <li
-            style={styles.navItem}
-            onClick={() => setActiveSection("Productos")}
-          >
-            Productos
-          </li>
-          <li
-            style={styles.navItem}
-            onClick={() => setActiveSection("Citas")}
-          >
-            Citas
-          </li>
-          <li
-            style={styles.navItem}
-            onClick={() => setActiveSection("Usuarios")}
-          >
-            Usuarios
-          </li>
-        </ul>
+        <Link to="/admin/products" style={styles.navLink}>
+          <div style={styles.card}>
+            <h2 style={styles.cardTitle}>Gestión de Productos</h2>
+            <p style={styles.cardDescription}>
+              Agrega, edita o elimina productos.
+            </p>
+          </div>
+        </Link>
+        <Link to="/admin/appointments" style={styles.navLink}>
+          <div style={styles.card}>
+            <h2 style={styles.cardTitle}>Gestión de Citas</h2>
+            <p style={styles.cardDescription}>
+              Gestiona citas solicitadas por los clientes.
+            </p>
+          </div>
+        </Link>
+        <Link to="/admin/users" style={styles.navLink}>
+          <div style={styles.card}>
+            <h2 style={styles.cardTitle}>Gestión de Usuarios</h2>
+            <p style={styles.cardDescription}>
+              Administra información de los usuarios.
+            </p>
+          </div>
+        </Link>
       </nav>
-      <main style={styles.main}>{renderSection()}</main>
     </div>
   );
 };
 
-const ProductsSection = () => (
-  <div>
-    <h2 style={styles.sectionTitle}>Gestión de Productos</h2>
-    <p style={styles.sectionDescription}>
-      Aquí puedes agregar, editar o eliminar productos.
-    </p>
-  </div>
-);
-
-const AppointmentsSection = () => (
-  <div>
-    <h2 style={styles.sectionTitle}>Gestión de Citas</h2>
-    <p style={styles.sectionDescription}>
-      Aquí puedes revisar y gestionar las citas de los clientes.
-    </p>
-  </div>
-);
-
-const UsersSection = () => (
-  <div>
-    <h2 style={styles.sectionTitle}>Gestión de Usuarios</h2>
-    <p style={styles.sectionDescription}>
-      Aquí puedes gestionar los usuarios registrados en el sistema.
-    </p>
-  </div>
-);
-
 const styles = {
   container: {
-    fontFamily: "'Arial', sans-serif",
-    color: "#333",
-    backgroundColor: "#f4f4f4",
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    backgroundColor: "#f1f3f5",
     minHeight: "100vh",
     display: "flex",
     flexDirection: "column",
+    alignItems: "center",
+    padding: "20px",
   },
   header: {
-    backgroundColor: "#4CAF50",
-    color: "white",
-    padding: "10px 20px",
+    backgroundColor: "#495057",
+    width: "100%",
+    padding: "15px 0",
     textAlign: "center",
+    color: "#ffffff",
+    borderRadius: "8px",
   },
-  title: {
-    margin: 0,
+  headerText: {
+    margin: "0",
     fontSize: "24px",
   },
   nav: {
-    backgroundColor: "#333",
-    color: "white",
-    padding: "10px 20px",
-  },
-  navList: {
-    listStyleType: "none",
-    margin: 0,
-    padding: 0,
+    marginTop: "20px",
     display: "flex",
-    justifyContent: "space-around",
+    gap: "20px",
+    flexWrap: "wrap",
+    justifyContent: "center",
   },
-  navItem: {
-    cursor: "pointer",
-    padding: "10px 20px",
-    textAlign: "center",
-    borderRadius: "5px",
-    transition: "background-color 0.3s",
-    color: "white",
+  navLink: {
+    textDecoration: "none",
+    flexBasis: "30%",
+    maxWidth: "300px",
   },
-  navItemHover: {
-    backgroundColor: "#4CAF50",
-  },
-  main: {
-    flex: 1,
+  card: {
+    backgroundColor: "#ffffff",
     padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     textAlign: "center",
+    transition: "transform 0.2s ease, box-shadow 0.2s ease",
   },
-  sectionTitle: {
+  cardTitle: {
     fontSize: "20px",
-    marginBottom: "10px",
+    color: "#212529",
+    margin: "0 0 10px 0",
   },
-  sectionDescription: {
+  cardDescription: {
     fontSize: "16px",
-    color: "#555",
+    color: "#6c757d",
+  },
+  cardHover: {
+    transform: "scale(1.05)",
+    boxShadow: "0 6px 12px rgba(0, 0, 0, 0.2)",
   },
 };
+
+// Agregando estilos dinámicos con eventos (hover)
+document.addEventListener("mouseover", (event) => {
+  if (event.target.closest("div")?.style === styles.card) {
+    event.target.closest("div").style.transform = styles.cardHover.transform;
+    event.target.closest("div").style.boxShadow = styles.cardHover.boxShadow;
+  }
+});
+
+document.addEventListener("mouseout", (event) => {
+  if (event.target.closest("div")?.style === styles.card) {
+    event.target.closest("div").style.transform = "none";
+    event.target.closest("div").style.boxShadow = styles.card.boxShadow;
+  }
+});
 
 export default AdminPanel;

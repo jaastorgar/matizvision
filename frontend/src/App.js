@@ -12,12 +12,16 @@ import PurchaseTracking from './pages/PurchaseTracking';
 import Purchases from './pages/Purchases';
 import ClientAppointments from './pages/ClientAppointments';
 import AdminPanel from "./pages/AdminPanel/AdminPanel";
+import AdminProducts from "./pages/AdminPanel/AdminProducts";
+import AdminAppointments from "./pages/AdminPanel/AdminAppointments";
+import AdminUsers from "./pages/AdminPanel/AdminUsers";
 
 const App = () => {
   const location = useLocation();
   const isLoggedIn = false; // Simulación del estado de autenticación
 
-  const showNavbarAndFooter = !['/login', '/register', '/admin'].includes(location.pathname);
+  // Ocultar Navbar y Footer en rutas de administración
+  const showNavbarAndFooter = !location.pathname.startsWith('/admin') && !['/login', '/register'].includes(location.pathname);
 
   return (
     <div>
@@ -33,6 +37,9 @@ const App = () => {
         <Route path="/purchases" element={<Purchases />} />
         <Route path="/client-appointments" element={<ClientAppointments />} />
         <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/admin/products" element={<AdminProducts />} />
+        <Route path="/admin/appointments" element={<AdminAppointments />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
       </Routes>
       {showNavbarAndFooter && <Footer />}
     </div>
