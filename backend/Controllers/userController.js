@@ -1,12 +1,12 @@
 const User = require('../models/User');
 const path = require('path');
 const fs = require('fs');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    
     // Busca el usuario por email
     const user = await User.findOne({ where: { email } });
     if (!user) {
@@ -46,7 +46,7 @@ exports.createUser = async (req, res) => {
       password: hashedPassword,
       age,
       birthDate,
-      photo: '/uploads/users/default.jpg', // Foto predeterminada
+      photo: '/uploads/users/default.jpg',
       role: role || 'cliente',
     });
 
