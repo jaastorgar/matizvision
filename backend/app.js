@@ -22,9 +22,11 @@ require('./models/Associations');
 const userRoutes = require('./Routes/userRoutes');
 const productRoutes = require('./Routes/productRoutes');
 const appointmentRoutes = require('./Routes/appointmentRoutes');
+const authRoutes = require('./Routes/authRoutes');
 
 // Rutas API y Auth
 app.use(express.json());
+app.use('/api/auth', authRoutes);
 app.use('/api/auth', userRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);

@@ -1,36 +1,30 @@
 import React, { createContext, useState, useEffect } from 'react';
 
-const AuthContext = createContext();
+export const AuthContext = createContext(); // Asegura que este contexto se exporta correctamente
 
 export const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Simulación de autenticación
     const storedUser = JSON.parse(localStorage.getItem('user'));
-    const token = localStorage.getItem('token');
-    if (storedUser && token) {
-      setIsLoggedIn(true);
+    if (storedUser) {
       setUser(storedUser);
     }
   }, []);
 
-  const login = (userData, token) => {
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', token);
-    setIsLoggedIn(true);
+  const login = (userData) => {
     setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
     setUser(null);
+    localStorage.removeItem('user');
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
