@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "Mamita10.",
+    "database": "matizvision",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "postgres",
+    "password": "Mamita10.",
+    "database": "matizvision",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "Mamita10.",
+    "database": "matizvision",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
