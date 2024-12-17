@@ -1,23 +1,27 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { DataTypes, Model } = require('sequelize');
 
-const Appointment = sequelize.define('Appointment', {
-  date: {
-    type: DataTypes.DATEONLY,
-    allowNull: false,
-  },
-  time: {
-    type: DataTypes.TIME,
-    allowNull: false,
-  },
-  serviceType: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  status: {
-    type: DataTypes.STRING,
-    defaultValue: 'pendiente',
-  },
-});
+module.exports = (sequelize) => {
+  class Appointment extends Model {}
 
-module.exports = Appointment;
+  Appointment.init({
+    date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    time: {
+      type: DataTypes.TIME,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM('pendiente', 'confirmado', 'cancelado'),
+      defaultValue: 'pendiente',
+    },
+  }, {
+    sequelize,
+    modelName: 'Appointment',
+    tableName: 'Appointments',
+    timestamps: true,
+  });
+
+  return Appointment;
+};

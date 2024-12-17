@@ -1,8 +1,12 @@
-const User = require('./User');
-const Appointment = require('./Appointment');
+const sequelize = require('../config/database');
+const User = require('./User')(sequelize);
+const Appointment = require('./Appointment')(sequelize);
 
-// Definir relaciones
+// Definir asociaciones
 User.hasMany(Appointment, { foreignKey: 'userId', onDelete: 'CASCADE' });
 Appointment.belongsTo(User, { foreignKey: 'userId' });
 
-module.exports = { User, Appointment };
+module.exports = {
+  User,
+  Appointment,
+};

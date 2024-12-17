@@ -15,7 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Importar asociaciones
+// Importar asociaciones (esto es importante para configurar relaciones)
 require('./models/Associations');
 
 // Importar rutas
@@ -27,7 +27,6 @@ const authRoutes = require('./Routes/authRoutes');
 // Rutas API y Auth
 app.use(express.json());
 app.use('/api/auth', authRoutes);
-app.use('/api/auth', userRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/appointments', appointmentRoutes);
@@ -37,7 +36,7 @@ sequelize.authenticate()
   .then(() => console.log('Conexión a la base de datos exitosa'))
   .catch((err) => console.error('Error al conectar con la base de datos:', err));
 
-sequelize.sync({ force: false }) // Cambiar a `force: true` para recrear las tablas
+sequelize.sync({ force: true }) // Cambiar a `force: true` para recrear las tablas
   .then(() => console.log('Base de datos sincronizada'))
   .catch((err) => console.error('Error al sincronizar la base de datos:', err));
 
