@@ -13,12 +13,10 @@ import Purchases from './pages/Purchases';
 import ClientAppointments from './pages/ClientAppointments';
 import { AuthContext } from './context/authContext';
 
-
-
 const App = () => {
   const { user } = useContext(AuthContext);
 
-  const excludeNavbarFooterRoutes = ['/login', '/register'];
+  const excludeNavbarFooterRoutes = ['/login', '/register', '/client-appointments'];
   const pathname = window.location.pathname;
   const showNavbarAndFooter = !excludeNavbarFooterRoutes.some(route => pathname.startsWith(route));
 

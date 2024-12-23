@@ -10,6 +10,7 @@ const appointmentsRoutes = require('./routes/appointments');
 const productsRoutes = require('./routes/products');
 const ordersRoutes = require('./routes/orders');
 const authRoutes = require('./routes/auth');
+const appointmentRoutes = require('./routes/appointments');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/api/appointments', appointmentsRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 // Prueba de conexión a la base de datos
 sequelize.authenticate().then(() => {

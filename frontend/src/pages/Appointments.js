@@ -1,113 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
-const Appointments = () => {
-  const [newAppointment, setNewAppointment] = useState({
-    date: '',
-    time: '',
-    serviceType: '',
-    user: {
-      name: '',
-      lastName: '',
-      rut: '',
-      dv: '',
-      age: '',
-      birthDate: '',
-    },
-  });
-  const isLoggedIn = true; // Cambia esto según tu lógica de autenticación
+const ClientAppointments = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name.startsWith('user.')) {
-      const field = name.split('.')[1];
-      setNewAppointment((prev) => ({
-        ...prev,
-        user: { ...prev.user, [field]: value },
-      }));
-    } else {
-      setNewAppointment((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const { data } = await api.get('/appointments/client');
+        setAppointments(data);
+      } catch (error) {
+        console.error('Error al obtener las citas:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const endpoint = '/api/appointments';
-
-    try {
-      const payload = {
-        ...newAppointment,
-        userId: isLoggedIn ? null : undefined, // Si está autenticado, asume que el backend asocia el cliente.
-      };
-
-      await api.post(endpoint, payload);
-      alert('Cita agendada con éxito');
-      setNewAppointment({
-        date: '',
-        time: '',
-        serviceType: '',
-        user: { name: '', lastName: '', rut: '', dv: '', age: '', birthDate: '' },
-      });
-    } catch (error) {
-      console.error('Error al agendar la cita:', error);
-      alert('Hubo un problema al agendar la cita.');
-    }
-  };
+    fetchAppointments();
+  }, []);
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Agendar Cita</h1>
-      <div style={styles.formContainer}>
-        <h2 style={styles.subtitle}>Agendar Cita</h2>
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            type="date"
-            name="date"
-            value={newAppointment.date}
-            onChange={handleInputChange}
-            required
-            style={styles.input}
-          />
-          <input
-            type="time"
-            name="time"
-            value={newAppointment.time}
-            onChange={handleInputChange}
-            required
-            style={styles.input}
-          />
-          <select
-            name="serviceType"
-            value={newAppointment.serviceType}
-            onChange={handleInputChange}
-            required
-            style={styles.select}
-          >
-            <option value="">Seleccione un servicio</option>
-            <option value="Consulta Visual">Consulta Visual</option>
-            <option value="Compra de Lentes">Compra de Lentes</option>
-            <option value="Revisión de Lentes">Revisión de Lentes</option>
-          </select>
-          {!isLoggedIn && (
-            <>
-              {['name', 'lastName', 'rut', 'dv', 'age', 'birthDate'].map((field) => (
-                <input
-                  key={field}
-                  type={field === 'age' ? 'number' : field === 'birthDate' ? 'date' : 'text'}
-                  name={`user.${field}`}
-                  value={newAppointment.user[field]}
-                  onChange={handleInputChange}
-                  placeholder={field === 'birthDate' ? 'Fecha de Nacimiento' : field}
-                  required
-                  style={styles.input}
-                />
-              ))}
-            </>
-          )}
-          <button type="submit" style={styles.button}>
-            Agendar Cita
-          </button>
-        </form>
+      <div style={styles.card}>
+        <h1 style={styles.title}>Citas Realizadas</h1>
+        {loading ? (
+          <p style={styles.message}>Cargando citas...</p>
+        ) : appointments.length > 0 ? (
+          <ul style={styles.list}>
+            {appointments.map((appointment) => (
+              <li key={appointment.id} style={styles.listItem}>
+                <strong>Fecha:</strong> {appointment.date} <br />
+                <strong>Hora:</strong> {appointment.time} <br />
+                <strong>Servicio:</strong> {appointment.serviceType} <br />
+                <strong>Estado:</strong> {appointment.status}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p style={styles.message}>No tienes citas agendadas.</p>
+        )}
       </div>
     </div>
   );
@@ -115,55 +47,42 @@ const Appointments = () => {
 
 const styles = {
   container: {
-    fontFamily: 'Arial, sans-serif',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    color: '#333',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100vh',
+    backgroundColor: '#f4f4f4',
   },
-  title: {
-    fontSize: '2rem',
-    textAlign: 'center',
-    marginBottom: '20px',
-    color: '#4caf50',
-  },
-  formContainer: {
-    marginBottom: '40px',
-    background: '#fff',
+  card: {
+    backgroundColor: '#fff',
     padding: '20px',
     borderRadius: '8px',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    width: '80%',
+    maxWidth: '600px',
   },
-  subtitle: {
-    fontSize: '1.5rem',
+  title: {
+    fontSize: '24px',
     color: '#333',
-    marginBottom: '10px',
+    textAlign: 'center',
+    marginBottom: '20px',
   },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
+  message: {
+    textAlign: 'center',
+    fontSize: '18px',
+    color: '#666',
   },
-  input: {
-    marginBottom: '10px',
+  list: {
+    listStyleType: 'none',
+    padding: 0,
+  },
+  listItem: {
+    marginBottom: '15px',
     padding: '10px',
     borderRadius: '4px',
-    border: '1px solid #dcdcdc',
-    fontSize: '1rem',
-  },
-  select: {
-    marginBottom: '10px',
-    padding: '10px',
-    borderRadius: '4px',
-    border: '1px solid #dcdcdc',
-    fontSize: '1rem',
-  },
-  button: {
-    backgroundColor: '#4caf50',
-    color: '#fff',
-    padding: '10px',
-    borderRadius: '4px',
-    border: 'none',
-    cursor: 'pointer',
+    backgroundColor: '#f9f9f9',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
   },
 };
 
-export default Appointments;
+export default ClientAppointments;
