@@ -1,7 +1,20 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { sequelize } = require('./models'); // Conexión a la base de datos
+const { sequelize } = require('./models');
+
+const usersRoutes = require('./routes/users');
+const appointmentsRoutes = require('./routes/appointments');
+const productsRoutes = require('./routes/products');
+const ordersRoutes = require('./routes/orders');
+
+/* 
+Debugging: Verifica el tipo de las rutas importadas
+console.log('usersRoutes:', typeof usersRoutes); // Debería imprimir 'function'
+console.log('appointmentsRoutes:', typeof appointmentsRoutes);
+console.log('productsRoutes:', typeof productsRoutes);
+console.log('ordersRoutes:', typeof ordersRoutes);
+*/
 
 const app = express();
 
@@ -10,10 +23,10 @@ app.use(express.json());
 app.use(cors());
 
 // Rutas
-app.use('/api/users', require('./routes/users'));
-app.use('/api/appointments', require('./routes/appointments'));
-app.use('/api/products', require('./routes/products'));
-app.use('/api/orders', require('./routes/orders'));
+app.use('/api/users', usersRoutes); // Correcto
+app.use('/api/appointments', appointmentsRoutes);
+app.use('/api/products', productsRoutes);
+app.use('/api/orders', ordersRoutes);
 
 // Prueba de conexión a la base de datos
 sequelize.authenticate().then(() => {
