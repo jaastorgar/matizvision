@@ -1,45 +1,104 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import api from '../services/api';
 
-const ClientAppointments = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
+const Appointments = () => {
+  const [newAppointment, setNewAppointment] = useState({
+    date: '',
+    time: '',
+    serviceType: '',
+    status: 'Pendiente', // Estado predeterminado de la cita
+    user: {
+      name: '',
+      last_name: '',
+      rut: '',
+      dv: '',
+      age: '',
+      birth_date: '',
+    },
+  });
+  const isLoggedIn = true; // Cambia según tu lógica de autenticación
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const { data } = await api.get('/appointments/client');
-        setAppointments(data);
-      } catch (error) {
-        console.error('Error al obtener las citas:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name.startsWith('user.')) {
+      const field = name.split('.')[1];
+      setNewAppointment((prev) => ({
+        ...prev,
+        user: { ...prev.user, [field]: value },
+      }));
+    } else {
+      setNewAppointment((prev) => ({ ...prev, [name]: value }));
+    }
+  };
 
-    fetchAppointments();
-  }, []);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const endpoint = '/appointments';
+
+    try {
+      const payload = {
+        user_id: isLoggedIn ? 1 : null, 
+        date: newAppointment.date,
+        time: newAppointment.time,
+        service_type: newAppointment.serviceType,
+        status: newAppointment.status,
+      };
+
+      console.log('Datos enviados al backend:', payload);
+
+      await api.post(endpoint, payload);
+      alert('Cita agendada con éxito');
+      setNewAppointment({
+        date: '',
+        time: '',
+        serviceType: '',
+        status: 'Pendiente',
+        user: { name: '', last_name: '', rut: '', dv: '', age: '', birth_date: '' },
+      });
+    } catch (error) {
+      console.error('Error al agendar la cita:', error);
+      alert(error.response?.data?.error || 'Hubo un problema al agendar la cita.');
+    }
+  };
 
   return (
     <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Citas Realizadas</h1>
-        {loading ? (
-          <p style={styles.message}>Cargando citas...</p>
-        ) : appointments.length > 0 ? (
-          <ul style={styles.list}>
-            {appointments.map((appointment) => (
-              <li key={appointment.id} style={styles.listItem}>
-                <strong>Fecha:</strong> {appointment.date} <br />
-                <strong>Hora:</strong> {appointment.time} <br />
-                <strong>Servicio:</strong> {appointment.serviceType} <br />
-                <strong>Estado:</strong> {appointment.status}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p style={styles.message}>No tienes citas agendadas.</p>
-        )}
+      <h1 style={styles.title}>Agendar Cita</h1>
+      <div style={styles.formContainer}>
+        <h2 style={styles.subtitle}>Completa los detalles de tu cita</h2>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <input
+            type="date"
+            name="date"
+            value={newAppointment.date}
+            onChange={handleInputChange}
+            required
+            style={styles.input}
+          />
+          <input
+            type="time"
+            name="time"
+            value={newAppointment.time}
+            onChange={handleInputChange}
+            required
+            style={styles.input}
+          />
+          <select
+            name="serviceType"
+            value={newAppointment.serviceType}
+            onChange={handleInputChange}
+            required
+            style={styles.select}
+          >
+            <option value="">Seleccione un servicio</option>
+            <option value="Consulta Visual">Consulta Visual</option>
+            <option value="Compra de Lentes">Compra de Lentes</option>
+            <option value="Revisión de Lentes">Revisión de Lentes</option>
+          </select>
+          <button type="submit" style={styles.button}>
+            Agendar Cita
+          </button>
+        </form>
       </div>
     </div>
   );
@@ -47,42 +106,55 @@ const ClientAppointments = () => {
 
 const styles = {
   container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#f4f4f4',
+    fontFamily: 'Arial, sans-serif',
+    padding: '20px',
+    backgroundColor: '#f9f9f9',
+    color: '#333',
   },
-  card: {
-    backgroundColor: '#fff',
+  title: {
+    fontSize: '2rem',
+    textAlign: 'center',
+    marginBottom: '20px',
+    color: '#4caf50',
+  },
+  formContainer: {
+    marginBottom: '40px',
+    background: '#fff',
     padding: '20px',
     borderRadius: '8px',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    width: '80%',
-    maxWidth: '600px',
   },
-  title: {
-    fontSize: '24px',
+  subtitle: {
+    fontSize: '1.5rem',
     color: '#333',
-    textAlign: 'center',
-    marginBottom: '20px',
+    marginBottom: '10px',
   },
-  message: {
-    textAlign: 'center',
-    fontSize: '18px',
-    color: '#666',
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
   },
-  list: {
-    listStyleType: 'none',
-    padding: 0,
-  },
-  listItem: {
-    marginBottom: '15px',
+  input: {
+    marginBottom: '10px',
     padding: '10px',
     borderRadius: '4px',
-    backgroundColor: '#f9f9f9',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    border: '1px solid #dcdcdc',
+    fontSize: '1rem',
+  },
+  select: {
+    marginBottom: '10px',
+    padding: '10px',
+    borderRadius: '4px',
+    border: '1px solid #dcdcdc',
+    fontSize: '1rem',
+  },
+  button: {
+    backgroundColor: '#4caf50',
+    color: '#fff',
+    padding: '10px',
+    borderRadius: '4px',
+    border: 'none',
+    cursor: 'pointer',
   },
 };
 
-export default ClientAppointments;
+export default Appointments;

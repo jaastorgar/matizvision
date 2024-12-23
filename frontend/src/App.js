@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -15,10 +15,11 @@ import { AuthContext } from './context/authContext';
 
 const App = () => {
   const { user } = useContext(AuthContext);
+  const location = useLocation();
 
+  // Rutas donde no se mostrarán el Navbar y Footer
   const excludeNavbarFooterRoutes = ['/login', '/register', '/client-appointments'];
-  const pathname = window.location.pathname;
-  const showNavbarAndFooter = !excludeNavbarFooterRoutes.some(route => pathname.startsWith(route));
+  const showNavbarAndFooter = !excludeNavbarFooterRoutes.includes(location.pathname);
 
   return (
     <div>
