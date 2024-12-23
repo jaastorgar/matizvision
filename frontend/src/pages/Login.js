@@ -13,13 +13,26 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('Intentando enviar los datos de inicio de sesión:', formData);
       const response = await axios.post('http://localhost:5000/api/auth/login', formData);
-      login(response.data.user, response.data.token);
+      console.log('Respuesta completa del servidor:', response.data);
+
+      const { user, token } = response.data;
+
+      // Validar si existen `user` y `token`
+      if (!user) {
+        throw new Error('El objeto "user" no existe en la respuesta del servidor.');
+      }
+      if (!token) {
+        throw new Error('El token no existe en la respuesta del servidor.');
+      }
+
+      login(user, token); // Pasar datos válidos al contexto
       alert('Inicio de sesión exitoso');
-      window.location.href = '/'; // Redirige al inicio después del login
+      window.location.href = '/';
     } catch (error) {
-      console.error('Error al iniciar sesión:', error);
-      alert('Error al iniciar sesión. Verifica tus credenciales.');
+      console.error('Error al iniciar sesión:', error.message);
+      alert(error.response?.data?.error || 'Error al iniciar sesión. Verifica tus credenciales.');
     }
   };
 
@@ -48,14 +61,6 @@ const Login = () => {
         <button type="submit" style={styles.button}>
           Iniciar Sesión
         </button>
-        <div style={styles.links}>
-          <a href="/register" style={styles.link}>
-            ¿No tienes cuenta? Regístrate
-          </a>
-          <a href="/forgot-password" style={styles.link}>
-            ¿Olvidaste tu contraseña?
-          </a>
-        </div>
       </form>
     </div>
   );
@@ -85,7 +90,7 @@ const styles = {
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
   },
   input: {
-    width: '95%', // Achicado para un diseño más compacto.
+    width: '95%',
     padding: '10px',
     margin: '12px 0',
     border: '1px solid #ccc',
@@ -101,18 +106,6 @@ const styles = {
     borderRadius: '4px',
     fontSize: '14px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
-  },
-  links: {
-    marginTop: '10px',
-    textAlign: 'center',
-  },
-  link: {
-    color: '#4CAF50',
-    textDecoration: 'none',
-    fontSize: '13px',
-    margin: '5px 0',
-    display: 'block',
   },
 };
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../api';
+import api from '../services/api';
 
 const Appointments = () => {
   const [newAppointment, setNewAppointment] = useState({
@@ -30,22 +30,28 @@ const Appointments = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const endpoint = isLoggedIn ? '/appointments/client' : '/appointments/guest';
+    const endpoint = '/api/appointments';
 
-    api
-      .post(endpoint, newAppointment)
-      .then(() => {
-        alert('Cita agendada con éxito');
-        setNewAppointment({
-          date: '',
-          time: '',
-          serviceType: '',
-          user: { name: '', lastName: '', rut: '', dv: '', age: '', birthDate: '' },
-        });
-      })
-      .catch((error) => console.error('Error al agendar la cita:', error));
+    try {
+      const payload = {
+        ...newAppointment,
+        userId: isLoggedIn ? null : undefined, // Si está autenticado, asume que el backend asocia el cliente.
+      };
+
+      await api.post(endpoint, payload);
+      alert('Cita agendada con éxito');
+      setNewAppointment({
+        date: '',
+        time: '',
+        serviceType: '',
+        user: { name: '', lastName: '', rut: '', dv: '', age: '', birthDate: '' },
+      });
+    } catch (error) {
+      console.error('Error al agendar la cita:', error);
+      alert('Hubo un problema al agendar la cita.');
+    }
   };
 
   return (
@@ -84,60 +90,18 @@ const Appointments = () => {
           </select>
           {!isLoggedIn && (
             <>
-              <input
-                type="text"
-                name="user.name"
-                value={newAppointment.user.name}
-                onChange={handleInputChange}
-                placeholder="Nombre"
-                required
-                style={styles.input}
-              />
-              <input
-                type="text"
-                name="user.lastName"
-                value={newAppointment.user.lastName}
-                onChange={handleInputChange}
-                placeholder="Apellido"
-                required
-                style={styles.input}
-              />
-              <input
-                type="text"
-                name="user.rut"
-                value={newAppointment.user.rut}
-                onChange={handleInputChange}
-                placeholder="RUT"
-                required
-                style={styles.input}
-              />
-              <input
-                type="text"
-                name="user.dv"
-                value={newAppointment.user.dv}
-                onChange={handleInputChange}
-                placeholder="DV"
-                required
-                style={styles.input}
-              />
-              <input
-                type="number"
-                name="user.age"
-                value={newAppointment.user.age}
-                onChange={handleInputChange}
-                placeholder="Edad"
-                required
-                style={styles.input}
-              />
-              <input
-                type="date"
-                name="user.birthDate"
-                value={newAppointment.user.birthDate}
-                onChange={handleInputChange}
-                placeholder="Fecha de Nacimiento"
-                required
-                style={styles.input}
-              />
+              {['name', 'lastName', 'rut', 'dv', 'age', 'birthDate'].map((field) => (
+                <input
+                  key={field}
+                  type={field === 'age' ? 'number' : field === 'birthDate' ? 'date' : 'text'}
+                  name={`user.${field}`}
+                  value={newAppointment.user[field]}
+                  onChange={handleInputChange}
+                  placeholder={field === 'birthDate' ? 'Fecha de Nacimiento' : field}
+                  required
+                  style={styles.input}
+                />
+              ))}
             </>
           )}
           <button type="submit" style={styles.button}>

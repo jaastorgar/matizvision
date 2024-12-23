@@ -1,12 +1,11 @@
 const express = require('express');
-const { getAllUsers, createUser } = require('../controllers/usersController');
+const upload = require('../Middlewares/Middleware');
+const { getAllUsers, createUser, registerUser } = require('../controllers/usersController');
 
 const router = express.Router();
 
-// Obtener todos los usuarios
 router.get('/', getAllUsers);
-
-// Crear un nuevo usuario
 router.post('/', createUser);
+router.post('/register', upload.single('profile_picture'), registerUser);
 
 module.exports = router;

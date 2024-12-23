@@ -4,7 +4,6 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Appointment extends Model {
     static associate(models) {
-      // Relación: Una cita pertenece a un usuario
       Appointment.belongsTo(models.User, { foreignKey: 'user_id' });
     }
   }

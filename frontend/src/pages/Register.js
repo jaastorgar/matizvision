@@ -1,31 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api';
+import api from '../services/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
-    lastName: '',
+    last_name: '',
     rut: '',
     dv: '',
     age: '',
-    birthDate: '',
+    birth_date: '',
     email: '',
     password: '',
+    profile_picture: null,
   });
+  const [preview, setPreview] = useState(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, profile_picture: file });
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const openCamera = async () => {
+    setCameraOpen(true);
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    videoRef.current.srcObject = stream;
+    videoRef.current.play();
+  };
+
+  const capturePhoto = () => {
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    const video = videoRef.current;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob((blob) => {
+      const file = new File([blob], 'profile_picture.jpg', { type: 'image/jpeg' });
+      setFormData({ ...formData, profile_picture: file });
+      setPreview(URL.createObjectURL(blob));
+    });
+
+    stopCamera();
+  };
+
+  const stopCamera = () => {
+    const stream = videoRef.current.srcObject;
+    if (stream) {
+      const tracks = stream.getTracks();
+      tracks.forEach((track) => track.stop());
+    }
+    setCameraOpen(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const formDataObj = new FormData();
+    for (let key in formData) {
+      formDataObj.append(key, formData[key]);
+    }
+
+    console.log('Datos enviados:', formData);
     try {
-      const response = await api.post('/users', formData);
+      await api.post('/users/register', formDataObj, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       alert('Usuario registrado con éxito');
-      console.log(response.data);
-      navigate('/login'); // Redirige al login después del registro
+      navigate('/login');
     } catch (error) {
       console.error('Error al registrar usuario:', error);
       alert('Error al registrar usuario');
@@ -47,9 +104,9 @@ const Register = () => {
         />
         <input
           type="text"
-          name="lastName"
+          name="last_name"
           placeholder="Apellido"
-          value={formData.lastName}
+          value={formData.last_name}
           onChange={handleChange}
           required
           style={styles.input}
@@ -83,9 +140,9 @@ const Register = () => {
         />
         <input
           type="date"
-          name="birthDate"
+          name="birth_date"
           placeholder="Fecha de nacimiento"
-          value={formData.birthDate}
+          value={formData.birth_date}
           onChange={handleChange}
           required
           style={styles.input}
@@ -108,13 +165,30 @@ const Register = () => {
           required
           style={styles.input}
         />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          style={styles.input}
+        />
+        <button type="button" onClick={openCamera} style={styles.button}>
+          Tomar Foto
+        </button>
+        {cameraOpen && (
+          <div style={styles.cameraContainer}>
+            <video ref={videoRef} style={styles.video}></video>
+            <button type="button" onClick={capturePhoto} style={styles.button}>
+              Capturar
+            </button>
+            <button type="button" onClick={stopCamera} style={styles.button}>
+              Cerrar Cámara
+            </button>
+          </div>
+        )}
+        {preview && <img src={preview} alt="Previsualización" style={styles.preview} />}
         <button type="submit" style={styles.button}>Registrar</button>
-        <div style={styles.links}>
-          <p onClick={() => navigate('/login')} style={styles.link}>
-            ¿Ya tienes una cuenta? Inicia sesión aquí
-          </p>
-        </div>
       </form>
+      <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
     </div>
   );
 };
@@ -125,49 +199,58 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f4f4f4',
+    padding: '20px',
   },
   form: {
-    width: '400px',
-    padding: '40px',
+    width: '100%',
+    maxWidth: '400px',
     backgroundColor: '#fff',
+    padding: '30px',
     borderRadius: '10px',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    margin: '20px',
   },
   title: {
     textAlign: 'center',
-    color: '#4caf50',
-    marginBottom: '25px',
-    fontWeight: 'bold',
+    color: '#4CAF50',
+    marginBottom: '20px',
+    fontSize: '1.5rem',
   },
   input: {
-    width: 'calc(100% - 20px)',
-    padding: '12px',
-    marginBottom: '20px',
-    borderRadius: '6px',
-    border: '1px solid #ccc',
-    boxSizing: 'border-box',
+    width: '100%',
+    padding: '10px',
+    marginBottom: '15px',
+    borderRadius: '5px',
+    border: '1px solid #ddd',
   },
   button: {
     width: '100%',
-    padding: '12px',
-    backgroundColor: '#4caf50',
-    color: '#fff',
+    padding: '10px',
+    marginTop: '10px',
+    borderRadius: '5px',
     border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
+    backgroundColor: '#4CAF50',
+    color: '#fff',
     fontWeight: 'bold',
-  },
-  links: {
-    marginTop: '20px',
-    textAlign: 'center',
-  },
-  link: {
-    color: '#4caf50',
     cursor: 'pointer',
-    textDecoration: 'underline',
-    fontSize: '0.9rem',
+  },
+  cameraContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginTop: '20px',
+  },
+  video: {
+    width: '100%',
+    maxWidth: '400px',
+    borderRadius: '10px',
+    marginBottom: '10px',
+  },
+  preview: {
+    width: '100%',
+    maxWidth: '400px',
+    height: 'auto',
+    marginTop: '10px',
   },
 };
 

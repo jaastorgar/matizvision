@@ -1,6 +1,16 @@
-const errorHandler = (err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: err.message });
-  };
-  
-  app.use(errorHandler);  
+const multer = require('multer');
+const path = require('path');
+
+// Configuración de almacenamiento para Multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage });
+
+module.exports = upload;

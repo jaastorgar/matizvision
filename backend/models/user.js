@@ -4,7 +4,6 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // Relación: Un usuario tiene muchas citas
       User.hasMany(models.Appointment, { foreignKey: 'user_id' });
     }
   }
@@ -19,7 +18,15 @@ module.exports = (sequelize, DataTypes) => {
       dv: DataTypes.CHAR,
       age: DataTypes.INTEGER,
       birth_date: DataTypes.DATE,
-      profile_picture: DataTypes.STRING,
+      profile_picture: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      role: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'cliente',
+      },
     },
     {
       sequelize,

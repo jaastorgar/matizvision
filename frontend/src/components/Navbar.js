@@ -60,26 +60,10 @@ const Navbar = () => {
 };
 
 const styles = {
-  navbar: {
-    backgroundColor: '#333',
-    padding: '10px 20px',
-  },
-  navList: {
-    listStyle: 'none',
-    display: 'flex',
-    justifyContent: 'space-around',
-    margin: 0,
-    padding: 0,
-  },
-  link: {
-    color: '#fff',
-    textDecoration: 'none',
-    fontSize: '16px',
-  },
-  dropdownContainer: {
-    position: 'relative',
-    cursor: 'pointer',
-  },
+  navbar: { backgroundColor: '#333', padding: '10px 20px' },
+  navList: { listStyle: 'none', display: 'flex', justifyContent: 'space-around', margin: 0, padding: 0 },
+  link: { color: '#fff', textDecoration: 'none', fontSize: '16px' },
+  dropdownContainer: { position: 'relative', cursor: 'pointer' },
   dropdown: {
     position: 'absolute',
     top: '100%',
@@ -92,14 +76,7 @@ const styles = {
     padding: '10px 0',
     zIndex: 1000,
   },
-  dropdownLink: {
-    display: 'block',
-    padding: '10px 20px',
-    color: '#333',
-    textDecoration: 'none',
-    fontSize: '14px',
-    whiteSpace: 'nowrap',
-  },
+  dropdownLink: { display: 'block', padding: '10px 20px', color: '#333', textDecoration: 'none', fontSize: '14px' },
 };
 
 export default Navbar;
