@@ -78,7 +78,7 @@ const Products = () => {
             onMouseLeave={() => setHoveredProduct(null)}
           >
             <img
-              src={product.photo || '/uploads/products/default.jpg'}
+              src={product.image_url || '/uploads/products/default.jpg'}
               alt={product.name}
               style={styles.productImage}
             />

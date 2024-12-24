@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const styles = {
   homeContainer: {
@@ -44,6 +46,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-around',
     gap: '20px',
+    flexWrap: 'wrap',
   },
   productCard: {
     background: '#fff',
@@ -53,6 +56,7 @@ const styles = {
     textAlign: 'center',
     width: '30%',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    minWidth: '250px',
   },
   productImage: {
     maxWidth: '100%',
@@ -101,40 +105,77 @@ const styles = {
     fontSize: '0.9rem',
     color: '#999',
   },
+  guaranteesSection: {
+    textAlign: 'center',
+    marginBottom: '40px',
+  },
+  guaranteesList: {
+    listStyleType: 'none',
+    padding: '0',
+  },
+  guaranteeItem: {
+    background: '#fff',
+    margin: '10px auto',
+    padding: '15px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    maxWidth: '600px',
+    textAlign: 'left',
+  },
 };
 
 const Home = () => {
+  const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await api.get('/products');
+        setProducts(data);
+      } catch (error) {
+        console.error('Error al cargar los productos destacados:', error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleAppointmentClick = () => {
+    navigate('/appointments');
+  };
+
   return (
     <div style={styles.homeContainer}>
       {/* Encabezado con banner */}
       <div style={styles.banner}>
         <h1 style={styles.bannerTitle}>Bienvenido a Matiz Vision</h1>
         <p style={styles.bannerText}>Encuentra el lente perfecto para tu estilo.</p>
-        <button style={styles.ctaButton}>Reserva tu cita gratis</button>
+        <button style={styles.ctaButton} onClick={handleAppointmentClick}>
+          Reserva tu cita gratis
+        </button>
       </div>
 
       {/* Sección de productos destacados */}
       <div style={styles.productsSection}>
         <h2 style={styles.sectionTitle}>Productos Destacados</h2>
         <div style={styles.productCards}>
-          <div style={styles.productCard}>
-            <img src="/uploads/products/sample1.jpg" alt="Producto 1" style={styles.productImage} />
-            <h3 style={styles.productTitle}>Modelo Elegante</h3>
-            <p style={styles.productPrice}>$49.990</p>
-            <button style={styles.productButton}>Ver Detalles</button>
-          </div>
-          <div style={styles.productCard}>
-            <img src="/uploads/products/sample2.jpg" alt="Producto 2" style={styles.productImage} />
-            <h3 style={styles.productTitle}>Modelo Clásico</h3>
-            <p style={styles.productPrice}>$39.990</p>
-            <button style={styles.productButton}>Ver Detalles</button>
-          </div>
-          <div style={styles.productCard}>
-            <img src="/uploads/products/sample3.jpg" alt="Producto 3" style={styles.productImage} />
-            <h3 style={styles.productTitle}>Modelo Moderno</h3>
-            <p style={styles.productPrice}>$59.990</p>
-            <button style={styles.productButton}>Ver Detalles</button>
-          </div>
+          {products.length > 0 ? (
+            products.slice(0, 3).map((product) => (
+              <div key={product.id} style={styles.productCard}>
+                <img
+                  src={product.image_url || '/uploads/products/default.jpg'}
+                  alt={product.name}
+                  style={styles.productImage}
+                />
+                <h3 style={styles.productTitle}>{product.name}</h3>
+                <p style={styles.productPrice}>${product.price}</p>
+                <button style={styles.productButton}>Ver Detalles</button>
+              </div>
+            ))
+          ) : (
+            <p style={{ textAlign: 'center' }}>No hay productos destacados disponibles.</p>
+          )}
         </div>
       </div>
 
@@ -155,6 +196,22 @@ const Home = () => {
             <span style={styles.testimonialAuthor}>- Juan Pérez</span>
           </div>
         </div>
+      </div>
+
+      {/* Sección de garantías */}
+      <div style={styles.guaranteesSection}>
+        <h2 style={styles.sectionTitle}>Nuestras Garantías</h2>
+        <ul style={styles.guaranteesList}>
+          <li style={styles.guaranteeItem}>
+            <strong>Garantía de Satisfacción:</strong> Si no estás completamente satisfecho con tu compra, te devolvemos tu dinero en 30 días.
+          </li>
+          <li style={styles.guaranteeItem}>
+            <strong>Garantía de Calidad:</strong> Todos nuestros productos están fabricados con los más altos estándares de calidad.
+          </li>
+          <li style={styles.guaranteeItem}>
+            <strong>Servicio Postventa:</strong> Reparaciones y ajustes gratuitos durante el primer año.
+          </li>
+        </ul>
       </div>
     </div>
   );
