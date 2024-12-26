@@ -29,8 +29,6 @@ const getClientAppointments = async (req, res) => {
       return res.status(400).json({ error: 'No se proporcionó el ID del usuario.' });
     }
 
-    console.log('Buscando citas para el usuario ID:', userId);
-
     const appointments = await Appointment.findAll({ where: { user_id: userId } });
 
     if (!appointments || appointments.length === 0) {

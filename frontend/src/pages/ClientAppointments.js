@@ -9,14 +9,19 @@ const ClientAppointments = () => {
     const fetchAppointments = async () => {
       try {
         const token = localStorage.getItem('token');
+        if (!token) {
+          console.error('Error: Usuario no autenticado.');
+          return;
+        }
         const { data } = await api.get('/appointments/client', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         setAppointments(data);
       } catch (error) {
-        console.error('Error al obtener las citas:', error);
+        console.error(
+          'Error al obtener las citas:',
+          error.response?.data || error.message
+        );
       } finally {
         setLoading(false);
       }
@@ -61,7 +66,9 @@ const ClientAppointments = () => {
         Mis Citas
       </h1>
       {loading ? (
-        <p style={{ textAlign: 'center', color: '#7f8c8d' }}>Cargando citas...</p>
+        <p style={{ textAlign: 'center', color: '#7f8c8d' }}>
+          Cargando citas...
+        </p>
       ) : appointments.length > 0 ? (
         <div
           style={{

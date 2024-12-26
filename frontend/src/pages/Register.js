@@ -69,23 +69,16 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formDataObj = new FormData();
-    for (let key in formData) {
-      formDataObj.append(key, formData[key]);
-    }
-
-    console.log('Datos enviados:', formData);
     try {
-      await api.post('/users/register', formDataObj, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      alert('Usuario registrado con éxito');
+      console.log('Datos enviados:', formData); 
+      const response = await api.post('/users/register', formData);
+      console.log('Respuesta del servidor:', response.data);
+  
+      alert('Registro exitoso');
       navigate('/login');
     } catch (error) {
-      console.error('Error al registrar usuario:', error);
-      alert('Error al registrar usuario');
+      console.error('Error al registrar usuario:', error.response?.data || error.message);
+      alert(error.response?.data?.message || 'Error al registrar usuario.');
     }
   };
 

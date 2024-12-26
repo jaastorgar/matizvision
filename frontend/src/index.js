@@ -5,7 +5,7 @@ import App from './App';
 import { AuthProvider } from './context/authContext';
 
 const container = document.getElementById('root');
-const root = createRoot(container); // Usar createRoot en lugar de ReactDOM.render
+const root = createRoot(container); 
 
 root.render(
   <React.StrictMode>

@@ -19,20 +19,29 @@ const createUser = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
+  const { email, password, ...rest } = req.body;
+
   try {
-    console.log('Datos recibidos:', req.body);
-    console.log('Archivo recibido:', req.file);
+    // Verificar si el correo ya está registrado
+    const existingUser = await User.findOne({ where: { email } });
 
-    const user = await User.create({
-      ...req.body,
-      role: req.body.role || 'cliente', // Valor predeterminado
-      profile_picture: req.file ? req.file.filename : null,
-    });
+    if (existingUser) {
+      return res.status(400).json({ message: 'El correo ya está registrado.' });
+    }
 
-    res.status(201).json({ message: 'Usuario registrado con éxito', user });
+    // Validar los campos obligatorios
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Correo y contraseña son obligatorios.' });
+    }
+
+    // Crear el usuario
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({ ...rest, email, password: hashedPassword });
+
+    res.status(201).json({ message: 'Usuario registrado exitosamente', user });
   } catch (error) {
-    console.error('Error al registrar usuario:', error.message);
-    res.status(400).json({ error: 'Error al registrar usuario', details: error.message });
+    console.error('Error al registrar usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
 

@@ -1,10 +1,12 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Solución para navigate
+import api from '../services/api'; // Solución para api
 import AuthContext from '../context/authContext';
 
 const Login = () => {
   const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const navigate = useNavigate(); // Define navigate
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -12,27 +14,24 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       console.log('Intentando enviar los datos de inicio de sesión:', formData);
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      const response = await api.post('/auth/login', formData);
       console.log('Respuesta completa del servidor:', response.data);
 
       const { user, token } = response.data;
 
-      // Validar si existen `user` y `token`
-      if (!user) {
-        throw new Error('El objeto "user" no existe en la respuesta del servidor.');
-      }
-      if (!token) {
-        throw new Error('El token no existe en la respuesta del servidor.');
+      if (!user || !token) {
+        throw new Error('La respuesta del servidor no contiene los datos esperados.');
       }
 
-      login(user, token); // Pasar datos válidos al contexto
+      login(user, token); // Guarda el usuario y el token en el contexto de autenticación
       alert('Inicio de sesión exitoso');
-      window.location.href = '/';
+      navigate('/dashboard'); // Redirige al dashboard
     } catch (error) {
       console.error('Error al iniciar sesión:', error.message);
-      alert(error.response?.data?.error || 'Error al iniciar sesión. Verifica tus credenciales.');
+      alert(error.response?.data?.message || 'Error al iniciar sesión.');
     }
   };
 
@@ -62,6 +61,14 @@ const Login = () => {
           Iniciar Sesión
         </button>
       </form>
+      <div style={styles.linksContainer}>
+        <a href="/forgot-password" style={styles.link}>
+          He olvidado la clave
+        </a>
+        <a href="/register" style={styles.link}>
+          Regístrate aquí
+        </a>
+      </div>
     </div>
   );
 };
@@ -106,6 +113,17 @@ const styles = {
     borderRadius: '4px',
     fontSize: '14px',
     cursor: 'pointer',
+  },
+  linksContainer: {
+    marginTop: '15px',
+    textAlign: 'center',
+  },
+  link: {
+    display: 'block',
+    margin: '5px 0',
+    color: '#007BFF',
+    textDecoration: 'none',
+    fontSize: '14px',
   },
 };
 
