@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ManageProducts from './ManageProducts';
 import ManageUsers from './ManageUsers';
 import RegisterAdmin from './RegisterAdmin';
+import ManageAppointments from './ManageAppointments';
 
 const Dashboard = () => {
   const [activeSection, setActiveSection] = useState('products');
@@ -14,6 +15,8 @@ const Dashboard = () => {
         return <ManageUsers />;
       case 'register':
         return <RegisterAdmin />;
+      case 'appointments':
+        return <ManageAppointments />;
       default:
         return <ManageProducts />;
     }
@@ -26,6 +29,7 @@ const Dashboard = () => {
         <button onClick={() => setActiveSection('products')} style={styles.button}>Gestionar Productos</button>
         <button onClick={() => setActiveSection('users')} style={styles.button}>Gestionar Usuarios</button>
         <button onClick={() => setActiveSection('register')} style={styles.button}>Registrar Administrador</button>
+        <button onClick={() => setActiveSection('appointments')} style={styles.button}>Gestionar Citas</button>
       </nav>
       <div style={styles.content}>{renderSection()}</div>
     </div>

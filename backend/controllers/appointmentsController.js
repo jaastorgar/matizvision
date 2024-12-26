@@ -20,7 +20,7 @@ const createAppointment = async (req, res) => {
   }
 };
 
-// Obtener cita del Cliente
+// Obtener citas de un cliente
 const getClientAppointments = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -42,8 +42,28 @@ const getClientAppointments = async (req, res) => {
   }
 };
 
+// Actualizar el estado de una cita
+exports.updateAppointmentStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const appointment = await Appointment.findByPk(id);
+    if (!appointment) {
+      return res.status(404).json({ message: 'Cita no encontrada' });
+    }
+    appointment.status = status;
+    await appointment.save();
+    res.json({ message: 'Estado actualizado', appointment });
+  } catch (error) {
+    console.error('Error al actualizar el estado de la cita:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
 module.exports = {
   getAllAppointments,
   createAppointment,
-  getClientAppointments
+  getClientAppointments,
+  updateAppointmentStatus,
 };
