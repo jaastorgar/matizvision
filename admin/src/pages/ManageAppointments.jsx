@@ -3,15 +3,23 @@ import api from '../services/api';
 
 const ManageAppointments = () => {
   const [appointments, setAppointments] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await api.get('/appointments');
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Token no encontrado');
+        }
+
+        const response = await api.get('/appointments', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setAppointments(response.data);
       } catch (error) {
-        console.error('Error al cargar las citas:', error);
+        console.error('Error al cargar las citas:', error.response?.data || error.message);
       }
     };
 
@@ -20,7 +28,17 @@ const ManageAppointments = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await api.put(`/appointments/${id}`, { status: newStatus });
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Token no encontrado');
+      }
+
+      await api.put(`/appointments/${id}`, { status: newStatus }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       setAppointments((prev) =>
         prev.map((appointment) =>
           appointment.id === id ? { ...appointment, status: newStatus } : appointment
@@ -40,6 +58,7 @@ const ManageAppointments = () => {
           <p><strong>Hora:</strong> {appointment.time}</p>
           <p><strong>Estado:</strong> {appointment.status}</p>
           <p><strong>Servicio:</strong> {appointment.service_type}</p>
+          <p><strong>Correo Electrónico:</strong> {appointment.email}</p>
           <button onClick={() => handleStatusChange(appointment.id, 'Aprobado')}>Aprobar</button>
           <button onClick={() => handleStatusChange(appointment.id, 'Cancelado')}>Cancelar</button>
           <button onClick={() => handleStatusChange(appointment.id, 'Reprogramado')}>Reprogramar</button>

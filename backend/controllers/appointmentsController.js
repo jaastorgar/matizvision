@@ -13,10 +13,20 @@ const getAllAppointments = async (req, res) => {
 // Crear una nueva cita
 const createAppointment = async (req, res) => {
   try {
-    const appointment = await Appointment.create(req.body);
+    const { date, time, service_type, email } = req.body;
+
+    // Crea la cita
+    const appointment = await Appointment.create({
+      date,
+      time,
+      service_type,
+      email,
+    });
+
     res.status(201).json(appointment);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error al crear la cita:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
 
@@ -43,7 +53,7 @@ const getClientAppointments = async (req, res) => {
 };
 
 // Actualizar el estado de una cita
-exports.updateAppointmentStatus = async (req, res) => {
+const updateAppointmentStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 

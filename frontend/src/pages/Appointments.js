@@ -6,29 +6,12 @@ const Appointments = () => {
     date: '',
     time: '',
     serviceType: '',
-    status: 'Pendiente', // Estado predeterminado de la cita
-    user: {
-      name: '',
-      last_name: '',
-      rut: '',
-      dv: '',
-      age: '',
-      birth_date: '',
-    },
+    status: 'Pendiente',
   });
-  const isLoggedIn = true; // Cambia según tu lógica de autenticación
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name.startsWith('user.')) {
-      const field = name.split('.')[1];
-      setNewAppointment((prev) => ({
-        ...prev,
-        user: { ...prev.user, [field]: value },
-      }));
-    } else {
-      setNewAppointment((prev) => ({ ...prev, [name]: value }));
-    }
+    setNewAppointment((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -36,8 +19,13 @@ const Appointments = () => {
     const endpoint = '/appointments';
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
+        return;
+      }
+
       const payload = {
-        user_id: isLoggedIn ? 1 : null, 
         date: newAppointment.date,
         time: newAppointment.time,
         service_type: newAppointment.serviceType,
@@ -46,17 +34,21 @@ const Appointments = () => {
 
       console.log('Datos enviados al backend:', payload);
 
-      await api.post(endpoint, payload);
+      await api.post(endpoint, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       alert('Cita agendada con éxito');
       setNewAppointment({
         date: '',
         time: '',
         serviceType: '',
         status: 'Pendiente',
-        user: { name: '', last_name: '', rut: '', dv: '', age: '', birth_date: '' },
       });
     } catch (error) {
-      console.error('Error al agendar la cita:', error);
+      console.error('Error al agendar la cita:', error.response?.data || error.message);
       alert(error.response?.data?.error || 'Hubo un problema al agendar la cita.');
     }
   };
