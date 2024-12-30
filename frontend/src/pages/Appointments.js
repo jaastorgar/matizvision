@@ -3,6 +3,7 @@ import api from '../services/api';
 
 const Appointments = () => {
   const [newAppointment, setNewAppointment] = useState({
+    email: '',
     date: '',
     time: '',
     serviceType: '',
@@ -26,6 +27,7 @@ const Appointments = () => {
       }
 
       const payload = {
+        email: newAppointment.email,
         date: newAppointment.date,
         time: newAppointment.time,
         service_type: newAppointment.serviceType,
@@ -42,6 +44,7 @@ const Appointments = () => {
 
       alert('Cita agendada con éxito');
       setNewAppointment({
+        email: '',
         date: '',
         time: '',
         serviceType: '',
@@ -59,6 +62,15 @@ const Appointments = () => {
       <div style={styles.formContainer}>
         <h2 style={styles.subtitle}>Completa los detalles de tu cita</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
+          <input
+            type="email"
+            name="email"
+            value={newAppointment.email}
+            onChange={handleInputChange}
+            required
+            placeholder="Correo Electrónico"
+            style={styles.input}
+          />
           <input
             type="date"
             name="date"

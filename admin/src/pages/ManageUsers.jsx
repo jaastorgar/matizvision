@@ -33,6 +33,35 @@ const ManageUsers = () => {
     }
   };
 
+  const renderUserTable = (title, filteredUsers) => (
+    <div style={styles.section}>
+      <h2 style={styles.subtitle}>{title}</h2>
+      <table style={styles.table}>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredUsers.map(user => (
+            <tr key={user.id}>
+              <td>{user.name} {user.last_name}</td>
+              <td>{user.email}</td>
+              <td>{user.role}</td>
+              <td>
+                <button style={styles.buttonEdit} onClick={() => alert('Editar usuario no implementado')}>Editar</button>
+                <button style={styles.buttonDelete} onClick={() => handleDelete(user.id)}>Eliminar</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Gestión de Usuarios</h1>
@@ -41,29 +70,10 @@ const ManageUsers = () => {
       ) : error ? (
         <p style={styles.error}>{error}</p>
       ) : (
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr key={user.id}>
-                <td>{user.name} {user.last_name}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
-                <td>
-                  <button style={styles.buttonEdit} onClick={() => alert('Editar usuario no implementado')}>Editar</button>
-                  <button style={styles.buttonDelete} onClick={() => handleDelete(user.id)}>Eliminar</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <>
+          {renderUserTable('Clientes', users.filter(user => user.role === 'cliente'))}
+          {renderUserTable('Administradores', users.filter(user => user.role === 'admin'))}
+        </>
       )}
     </div>
   );
@@ -84,9 +94,17 @@ const styles = {
     color: '#333',
     marginBottom: '20px',
   },
+  subtitle: {
+    textAlign: 'left',
+    color: '#555',
+    marginBottom: '10px',
+  },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
+  },
+  section: {
+    marginBottom: '30px',
   },
   error: {
     color: 'red',

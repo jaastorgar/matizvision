@@ -25,7 +25,6 @@ app.use('/api/appointments', appointmentsRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/appointments', appointmentRoutes);
 
 // Prueba de conexión a la base de datos
 sequelize.authenticate().then(() => {

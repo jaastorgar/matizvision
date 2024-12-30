@@ -1,13 +1,26 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import AuthContext from '../context/authContext';
 
 const Navbar = () => {
-  const { isLoggedIn, user, logout } = useContext(AuthContext);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [userEmail, setUserEmail] = useState(null);
+
+  useEffect(() => {
+    const email = localStorage.getItem('email');
+    if (email) {
+      setUserEmail(email);
+    }
+  }, []);
 
   const handleMouseEnter = () => setIsDropdownVisible(true);
   const handleMouseLeave = () => setIsDropdownVisible(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('email');
+    localStorage.removeItem('token');
+    setUserEmail(null);
+    window.location.href = '/login'; // Redirige al login después de cerrar sesión
+  };
 
   return (
     <nav style={styles.navbar}>
@@ -21,18 +34,18 @@ const Navbar = () => {
         <li>
           <Link to="/products" style={styles.link}>Productos</Link>
         </li>
-        {!isLoggedIn && (
+        {!userEmail && (
           <li>
             <Link to="/login" style={styles.link}>Iniciar Sesión</Link>
           </li>
         )}
-        {isLoggedIn && (
+        {userEmail && (
           <li
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             style={styles.dropdownContainer}
           >
-            <span style={styles.link}>Hola, {user.name}</span>
+            <span style={styles.link}>Hola, {userEmail}</span>
             {isDropdownVisible && (
               <ul style={styles.dropdown}>
                 <li>
@@ -48,7 +61,7 @@ const Navbar = () => {
                   <Link to="/client-appointments" style={styles.dropdownLink}>Citas Realizadas</Link>
                 </li>
                 <li>
-                  <span onClick={logout} style={styles.dropdownLink}>Cerrar Sesión</span>
+                  <span onClick={handleLogout} style={styles.dropdownLink}>Cerrar Sesión</span>
                 </li>
               </ul>
             )}

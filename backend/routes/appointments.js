@@ -5,12 +5,13 @@ const {
   getClientAppointments,
   updateAppointmentStatus,
 } = require('../controllers/appointmentsController');
-const { authenticateUser, verifyToken }  = require('../Middlewares/auth');
+const authenticateUser = require('../Middlewares/auth');
 
 const router = express.Router();
 
-router.get('/', authenticateUser, getAllAppointments);
-router.post('/appointments', verifyToken, createAppointment);
+// Rutas para citas
+router.get('/', authenticateUser, getAllAppointments); 
+router.post('/', authenticateUser, createAppointment);
 router.get('/client', authenticateUser, getClientAppointments);
 router.put('/:id', authenticateUser, updateAppointmentStatus);
 

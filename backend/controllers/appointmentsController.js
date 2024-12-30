@@ -6,26 +6,30 @@ const getAllAppointments = async (req, res) => {
     const appointments = await Appointment.findAll();
     res.json(appointments);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error al obtener las citas:', error);
+    res.status(500).json({ error: 'Error interno del servidor.' });
   }
 };
 
 // Crear una nueva cita
 const createAppointment = async (req, res) => {
   try {
-    const { date, time, service_type, email } = req.body;
+    const { email, date, time, service_type, status } = req.body;
 
-    // Crea la cita
+    const user_id = req.user?.id || null;
+
     const appointment = await Appointment.create({
+      user_id,
+      email,
       date,
       time,
       service_type,
-      email,
+      status: status || 'pendiente',
     });
 
     res.status(201).json(appointment);
   } catch (error) {
-    console.error('Error al crear la cita:', error.message);
+    console.error('Error al crear la cita:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
@@ -33,21 +37,19 @@ const createAppointment = async (req, res) => {
 // Obtener citas de un cliente
 const getClientAppointments = async (req, res) => {
   try {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      return res.status(400).json({ error: 'No se proporcionó el ID del usuario.' });
+    const email = req.query.email || req.user?.email;
+    if (!email) {
+      return res.status(400).json({ error: 'No se proporcionó el correo del usuario.' });
     }
 
-    const appointments = await Appointment.findAll({ where: { user_id: userId } });
-
+    const appointments = await Appointment.findAll({ where: { email } });
     if (!appointments || appointments.length === 0) {
       return res.status(404).json({ error: 'No se encontraron citas para este usuario.' });
     }
 
     res.status(200).json(appointments);
   } catch (error) {
-    console.error('Error al obtener las citas del cliente:', error.message);
+    console.error('Error al obtener las citas del cliente:', error);
     res.status(500).json({ error: 'Error interno del servidor.' });
   }
 };

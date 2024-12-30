@@ -9,11 +9,21 @@ module.exports = (sequelize, DataTypes) => {
   }
   Appointment.init(
     {
-      user_id: DataTypes.INTEGER,
+      user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       date: DataTypes.DATE,
       time: DataTypes.TIME,
       service_type: DataTypes.STRING,
-      status: DataTypes.STRING,
+      status: {
+        type: DataTypes.STRING,
+        defaultValue: 'pendiente',
+      },
     },
     {
       sequelize,
@@ -21,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'Appointments',
       underscored: true,
     }
-  );
+  );  
+  
   return Appointment;
 };
