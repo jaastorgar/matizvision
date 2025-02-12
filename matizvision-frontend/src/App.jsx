@@ -5,6 +5,7 @@ import Citas from './pages/Citas';
 import Lentes from './pages/Lentes';
 import Carrito from './pages/Carrito';
 import Register from './pages/Register';
+import CitasAgendadas from './pages/CitasAgendadas';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Route path="/lentes" element={<Lentes />} />
       <Route path="/carrito" element={<Carrito />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/citas-agendadas" element={<CitasAgendadas />} />
     </Routes>
   );
 }

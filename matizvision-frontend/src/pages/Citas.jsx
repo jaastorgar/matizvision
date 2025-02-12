@@ -4,71 +4,80 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 function Citas() {
-  const [citas, setCitas] = useState([]);
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
   const [email, setEmail] = useState('');
   const [telefono, setTelefono] = useState('');
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCitas = async () => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
       try {
-        const response = await api.get('/api/citas');
-        setCitas(response.data);
+        setUser(JSON.parse(storedUser));
       } catch (error) {
-        console.error('Error al obtener citas', error);
+        console.error("❌ Error al parsear el usuario:", error);
       }
-    };
-
-    const fetchUser = async () => {
-      try {
-        const response = await api.get('/auth/me');
-        setUser(response.data);
-      } catch (error) {
-        setUser(null);
-      }
-    };
-
-    fetchCitas();
-    fetchUser();
+    }
+    setIsLoading(false);
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const citaData = user ? { fecha, hora, userId: user.id } : { fecha, hora, email, telefono };
-      await api.post('/api/citas', citaData);
-      alert('Cita solicitada con éxito');
+      const token = localStorage.getItem("token"); // ✅ Obtener el token de autenticación
+      if (!token) {
+        alert("❌ Debes iniciar sesión para agendar una cita.");
+        return;
+      }
+
+      const headers = { Authorization: `Bearer ${token}` }; // ✅ Agregar el token en la solicitud
+
+      const citaData = user 
+        ? { fecha, hora, userId: user.id } 
+        : { fecha, hora, email, telefono };
+
+      const response = await api.post('/citas', citaData, { headers });
+
+      alert(response.data.msg || '✅ Cita solicitada con éxito');
       setFecha('');
       setHora('');
       setEmail('');
       setTelefono('');
     } catch (error) {
-      alert('Error al solicitar la cita');
+      alert('❌ Error al solicitar la cita: ' + (error.response?.data?.msg || error.message));
     }
   };
+
+  if (isLoading) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <>
       <Navbar />
-      <div style={{ padding: '40px', backgroundColor: '#D3D3D3', minHeight: '100vh' }}> {/* Fondo plomo */}
-        <h2 style={{ textAlign: 'center', color: '#008000' }}>Solicitar Cita</h2> {/* Verde */}
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <form onSubmit={handleSubmit} style={{ backgroundColor: '#ffffff', padding: '20px', borderRadius: '10px', width: '50%' }}> {/* Blanco */}
-            <label>Fecha:</label>
-            <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required style={{ width: '100%', padding: '10px', margin: '10px 0' }} />
-            <label>Hora:</label>
-            <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} required style={{ width: '100%', padding: '10px', margin: '10px 0' }} />
+      <div style={containerStyle}>
+        <div style={formStyle}>
+          <h2 style={titleStyle}>📅 Solicitar Cita</h2>
+          <form onSubmit={handleSubmit} style={formContainerStyle}>
+            <label style={labelStyle}>Fecha:</label>
+            <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required style={inputStyle} />
+
+            <label style={labelStyle}>Hora:</label>
+            <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} required style={inputStyle} />
+
             {!user && (
               <>
-                <label>Correo:</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: '100%', padding: '10px', margin: '10px 0' }} />
-                <label>Teléfono:</label>
-                <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)} required style={{ width: '100%', padding: '10px', margin: '10px 0' }} />
+                <label style={labelStyle}>Correo:</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={inputStyle} />
+
+                <label style={labelStyle}>Teléfono:</label>
+                <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)} required style={inputStyle} />
               </>
             )}
-            <button type="submit" style={{ backgroundColor: '#008000', color: '#ffffff', padding: '10px', border: 'none', borderRadius: '5px', width: '100%', cursor: 'pointer' }}>Solicitar Cita</button>
+
+            <button type="submit" style={buttonStyle}>📌 Solicitar Cita</button>
           </form>
         </div>
       </div>
@@ -76,5 +85,60 @@ function Citas() {
     </>
   );
 }
+
+const containerStyle = {
+  padding: '40px',
+  backgroundColor: '#f0f0f0',
+  minHeight: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+};
+
+const formStyle = {
+  backgroundColor: '#ffffff',
+  padding: '30px',
+  borderRadius: '10px',
+  boxShadow: '0px 4px 8px rgba(0,0,0,0.1)',
+  width: '100%',
+  maxWidth: '500px'
+};
+
+const titleStyle = {
+  textAlign: 'center',
+  color: '#008000',
+  marginBottom: '20px'
+};
+
+const formContainerStyle = {
+  display: 'flex',
+  flexDirection: 'column'
+};
+
+const labelStyle = {
+  fontWeight: 'bold',
+  marginBottom: '5px'
+};
+
+const inputStyle = {
+  width: '100%',
+  padding: '10px',
+  marginBottom: '10px',
+  border: '1px solid #ccc',
+  borderRadius: '5px',
+  fontSize: '16px'
+};
+
+const buttonStyle = {
+  backgroundColor: '#008000',
+  color: '#ffffff',
+  padding: '12px',
+  border: 'none',
+  borderRadius: '5px',
+  width: '100%',
+  cursor: 'pointer',
+  fontSize: '18px',
+  marginTop: '15px'
+};
 
 export default Citas;

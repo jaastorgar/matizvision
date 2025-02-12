@@ -108,7 +108,7 @@ const Navbar = () => {
                 <li><Link to="/perfil" style={menuLink}>Perfil</Link></li>
                 <li><Link to="/compras" style={menuLink}>Mis Compras</Link></li>
                 <li><Link to="/seguimiento" style={menuLink}>Seguimiento de Compra</Link></li>
-                <li><Link to="/citas-historial" style={menuLink}>Citas Agendadas</Link></li>
+                <li><Link to="/citas-agendadas" style={menuLink}>Citas Agendadas</Link></li>
                 <li><button onClick={handleLogout} style={logoutButton}>❌ Cerrar Sesión</button></li>
               </ul>
             )}
