@@ -10,22 +10,28 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post('/auth/login', { email, password });
+        const response = await api.post('/auth/login', { email, password });
 
-      // Guardar el token en localStorage
-      localStorage.setItem("token", response.data.token);
+        if (!response.data.token || !response.data.usuario) {
+            alert("❌ Error al iniciar sesión. Intente nuevamente.");
+            return;
+        }
 
-      // Guardar la información del usuario en localStorage
-      localStorage.setItem("user", JSON.stringify(response.data.usuario));
+        // Guardar el token y la información del usuario
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.usuario));
 
-      // Actualizar el estado del usuario en el Navbar
-      setTimeout(() => {
-        navigate("/");
-      }, 500); // Espera breve para asegurar que los datos se guarden correctamente
+        // Notificar al Navbar que el usuario ha cambiado
+        window.dispatchEvent(new Event("storage"));
+
+        // Redirigir a la página de inicio
+        setTimeout(() => {
+            navigate("/");
+        }, 500);
 
     } catch (error) {
-      alert('❌ Error al iniciar sesión. Verifica tus credenciales.');
-    }
+        alert('❌ Error al iniciar sesión. Verifica tus credenciales.');
+      }
   };
 
   return (

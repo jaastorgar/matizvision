@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [carrito, setCarrito] = useState([]);
 
   useEffect(() => {
-    // Verificar cambios en `localStorage` para actualizar el usuario en tiempo real
     const checkUser = () => {
       const storedUser = localStorage.getItem("user");
-      
-      // Validar que el valor no sea `null` o `undefined`
       if (storedUser && storedUser !== "undefined") {
         try {
           setUser(JSON.parse(storedUser));
@@ -34,7 +32,6 @@ const Navbar = () => {
 
     fetchCarrito();
 
-    // Escuchar cambios en `localStorage`
     window.addEventListener("storage", checkUser);
 
     return () => {
@@ -42,12 +39,21 @@ const Navbar = () => {
     };
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.dispatchEvent(new Event("storage"));
+    setUser(null);
+    setMenuOpen(false);
+    navigate("/");
+  };
+
   return (
     <nav style={{
       backgroundColor: "#0a0a1f",
       color: "#ffffff",
       padding: "15px",
-      display: location.pathname === "/login" ? "none" : "flex",
+      display: location.pathname === "/login" || location.pathname === "/register" ? "none" : "flex",
       justifyContent: "space-between",
       alignItems: "center",
       position: "relative"
@@ -63,7 +69,6 @@ const Navbar = () => {
         <li><Link to="/" style={{ color: "#ffffff", textDecoration: "none" }}>Inicio</Link></li>
         <li><Link to="/lentes" style={{ color: "#ffffff", textDecoration: "none" }}>Tienda de Lentes</Link></li>
         <li><Link to="/citas" style={{ color: "#ffffff", textDecoration: "none" }}>Agendar Examen</Link></li>
-
         <li>
           <Link to="/carrito" style={{ color: "#ffffff", textDecoration: "none" }}>
             🛒 ({carrito.length})
@@ -98,12 +103,13 @@ const Navbar = () => {
                 padding: "10px",
                 borderRadius: "5px",
                 boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                minWidth: "150px"
+                minWidth: "180px"
               }}>
                 <li><Link to="/perfil" style={menuLink}>Perfil</Link></li>
                 <li><Link to="/compras" style={menuLink}>Mis Compras</Link></li>
                 <li><Link to="/seguimiento" style={menuLink}>Seguimiento de Compra</Link></li>
                 <li><Link to="/citas-historial" style={menuLink}>Citas Agendadas</Link></li>
+                <li><button onClick={handleLogout} style={logoutButton}>❌ Cerrar Sesión</button></li>
               </ul>
             )}
           </li>
@@ -119,7 +125,19 @@ const menuLink = {
   textDecoration: "none",
   color: "#0a0a1f",
   display: "block",
-  padding: "5px 10px"
+  padding: "5px 10px",
+  cursor: "pointer"
+};
+
+const logoutButton = {
+  background: "none",
+  border: "none",
+  color: "#ff0000",
+  fontSize: "14px",
+  cursor: "pointer",
+  padding: "5px 10px",
+  width: "100%",
+  textAlign: "left"
 };
 
 export default Navbar;

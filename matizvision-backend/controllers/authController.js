@@ -17,6 +17,7 @@ exports.register = async (req, res) => {
         const user = await Usuario.create({
             nombre,
             apellido,
+            telefono,
             email,
             password: hashedPassword,
             rol: rol || 'cliente'
@@ -43,7 +44,17 @@ exports.login = async (req, res) => {
         // Generar token
         const token = jwt.sign({ id: user.id, rol: user.rol }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        res.json({ msg: "Inicio de sesión exitoso", token });
+        // Enviar usuario junto con el token
+        res.json({
+            msg: "Inicio de sesión exitoso",
+            token,
+            usuario: {
+                id: user.id,
+                nombre: user.nombre,
+                email: user.email,
+                rol: user.rol
+            }
+        });
     } catch (error) {
         res.status(500).json({ msg: "Error al iniciar sesión", error });
     }
