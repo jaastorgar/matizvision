@@ -9,15 +9,18 @@ const sequelize = new Sequelize(
     process.env.DB_PASS,
     {
         host: process.env.DB_HOST,
-        dialect: 'postgres'
+        dialect: 'postgres',
+        logging: false
     }
 );
 
 const db = {};
+
+// 🔹 Cargar modelos correctamente
 fs.readdirSync(__dirname)
     .filter(file => file !== 'index.js')
     .forEach(file => {
-        const model = require(path.join(__dirname, file))(sequelize, DataTypes);
+        const model = require(path.join(__dirname, file));  // ✅ Ahora los modelos se importan correctamente
         db[model.name] = model;
     });
 

@@ -1,0 +1,11 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    - duration: 60
+      arrivalRate: 10  # 10 usuarios por segundo
+      name: "Prueba de carga"
+
+scenarios:
+  - flow:
+      - get:
+          url: "/api/products"
