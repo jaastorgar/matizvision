@@ -1,36 +1,34 @@
-const fs = require('fs');
-const path = require('path');
 const { Sequelize, DataTypes } = require('sequelize');
-require('dotenv').config();
+const sequelize = require('../config/database');
 
-const sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASS,
-    {
-        host: process.env.DB_HOST,
-        dialect: 'postgres',
-        logging: false
-    }
-);
+// Importar modelos
+const Usuario = require('./usuario');
+const Producto = require('./producto');
+const Compra = require('./compra');
+const DetalleCompra = require('./detallecompra');
+const Cita = require('./cita');
+const AdminLogs = require('./adminlogs');
 
-const db = {};
+// Definir relaciones
+Usuario.hasMany(Compra, { foreignKey: 'usuarioId' });
+Compra.belongsTo(Usuario, { foreignKey: 'usuarioId' });
 
-// 🔹 Cargar modelos correctamente
-fs.readdirSync(__dirname)
-    .filter(file => file !== 'index.js')
-    .forEach(file => {
-        const model = require(path.join(__dirname, file));  // ✅ Ahora los modelos se importan correctamente
-        db[model.name] = model;
-    });
+Compra.hasMany(DetalleCompra, { foreignKey: 'compraId' });
+DetalleCompra.belongsTo(Compra, { foreignKey: 'compraId' });
 
-Object.keys(db).forEach(modelName => {
-    if (db[modelName].associate) {
-        db[modelName].associate(db);
-    }
-});
+Producto.hasMany(DetalleCompra, { foreignKey: 'productoId' });
+DetalleCompra.belongsTo(Producto, { foreignKey: 'productoId' });
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+Usuario.hasMany(Cita, { foreignKey: 'usuarioId' });
+Cita.belongsTo(Usuario, { foreignKey: 'usuarioId' });
 
-module.exports = db;
+// Exportar los modelos
+module.exports = {
+    sequelize,
+    Usuario,
+    Producto,
+    Compra,
+    DetalleCompra,
+    Cita,
+    AdminLogs
+};

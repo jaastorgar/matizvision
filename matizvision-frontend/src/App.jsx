@@ -6,6 +6,8 @@ import Lentes from './pages/Lentes';
 import Carrito from './pages/Carrito';
 import Register from './pages/Register';
 import CitasAgendadas from './pages/CitasAgendadas';
+import Perfil from './pages/Perfil';
+import MisCompras from './pages/MisCompras';
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
       <Route path="/carrito" element={<Carrito />} />
       <Route path="/register" element={<Register />} />
       <Route path="/citas-agendadas" element={<CitasAgendadas />} />
+      <Route path="/perfil" element={<Perfil />} />
+      <Route path="/compras" element={<MisCompras />} />
     </Routes>
   );
 }

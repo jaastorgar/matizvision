@@ -12,7 +12,8 @@ Producto.init({
 }, {
     sequelize,
     modelName: 'Producto',
-    tableName: 'Productos'
+    tableName: 'Productos',
+    timestamps: true 
 });
 
 module.exports = Producto;

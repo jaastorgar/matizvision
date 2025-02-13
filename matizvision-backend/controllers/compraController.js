@@ -45,3 +45,33 @@ exports.updateCompra = async (req, res) => {
         res.status(500).json({ msg: "Error al actualizar compra", error });
     }
 };
+
+exports.obtenerComprasPorUsuario = async (req, res) => {
+    try {
+        const { usuarioId } = req.params;
+
+        if (!usuarioId || isNaN(usuarioId)) {
+            return res.status(400).json({ msg: "ID de usuario no válido" });
+        }
+
+        const compras = await Compra.findAll({
+            where: { usuarioId },
+            include: [
+                {
+                    model: DetalleCompra,
+                    as: "detalles",
+                    include: [{ model: Producto, attributes: ["nombre", "precio"] }]
+                }
+            ]
+        });
+
+        if (!compras || compras.length === 0) {
+            return res.status(404).json({ msg: "No hay compras registradas para este usuario." });
+        }
+
+        res.json(compras);
+    } catch (error) {
+        console.error("❌ Error al obtener compras:", error);
+        res.status(500).json({ msg: "Error interno al obtener compras" });
+    }
+};

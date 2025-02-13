@@ -1,16 +1,36 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { Model, DataTypes } = require("sequelize");
+const sequelize = require("../config/database");
 
 class DetalleCompra extends Model {}
 
-DetalleCompra.init({
-    compraId: DataTypes.INTEGER,
-    productoId: DataTypes.INTEGER,
-    cantidad: DataTypes.INTEGER
-}, {
-    sequelize,
-    modelName: 'DetalleCompra',
-    tableName: 'DetalleCompras'
-});
+DetalleCompra.init(
+    {
+        compraId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: "Compra", 
+                key: "id"
+            }
+        },
+        productoId: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        cantidad: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        precioUnitario: {
+            type: DataTypes.FLOAT,
+            allowNull: false
+        }
+    },
+    {
+        sequelize,
+        modelName: "DetalleCompra",
+        tableName: "DetalleCompras"
+    }
+);
 
 module.exports = DetalleCompra;

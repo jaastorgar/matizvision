@@ -20,7 +20,9 @@ Usuario.init({
 }, {
     sequelize,
     modelName: 'Usuario',
-    tableName: 'Usuarios'
+    tableName: 'Usuarios',
+    timestamps: true
 });
 
+// Exporta el modelo correctamente
 module.exports = Usuario;

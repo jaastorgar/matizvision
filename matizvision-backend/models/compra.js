@@ -4,9 +4,18 @@ const sequelize = require('../config/database');
 class Compra extends Model {}
 
 Compra.init({
-    usuarioId: DataTypes.INTEGER,
-    total: DataTypes.FLOAT,
-    estado: DataTypes.STRING
+    usuarioId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    total: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+    },
+    estado: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
 }, {
     sequelize,
     modelName: 'Compra',
