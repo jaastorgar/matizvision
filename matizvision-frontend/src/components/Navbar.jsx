@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import logo from "/matiz.png";
 
 const Navbar = () => {
   const location = useLocation();
@@ -24,16 +25,13 @@ const Navbar = () => {
     };
 
     checkUser();
-
     const fetchCarrito = () => {
       const carritoStorage = JSON.parse(localStorage.getItem("carrito")) || [];
       setCarrito(carritoStorage);
     };
-
     fetchCarrito();
 
     window.addEventListener("storage", checkUser);
-
     return () => {
       window.removeEventListener("storage", checkUser);
     };
@@ -49,62 +47,26 @@ const Navbar = () => {
   };
 
   return (
-    <nav style={{
-      backgroundColor: "#0a0a1f",
-      color: "#ffffff",
-      padding: "15px",
-      display: location.pathname === "/login" || location.pathname === "/register" ? "none" : "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      position: "relative"
-    }}>
-      <h1 style={{ color: "#00ffff" }}>Matiz Vision</h1>
+    <nav style={navStyle}>
+      <Link to="/" style={logoContainer}>
+        <img src={logo} alt="Matiz Vision Logo" style={logoStyle} />
+      </Link>
 
-      <ul style={{
-        listStyle: "none",
-        display: "flex",
-        gap: "20px",
-        alignItems: "center",
-      }}>
-        <li><Link to="/" style={{ color: "#ffffff", textDecoration: "none" }}>Inicio</Link></li>
-        <li><Link to="/lentes" style={{ color: "#ffffff", textDecoration: "none" }}>Tienda de Lentes</Link></li>
-        <li><Link to="/citas" style={{ color: "#ffffff", textDecoration: "none" }}>Agendar Examen</Link></li>
-        <li>
-          <Link to="/carrito" style={{ color: "#ffffff", textDecoration: "none" }}>
-            🛒 ({carrito.length})
-          </Link>
-        </li>
+      <ul style={menuStyle}>
+        <li><Link to="/" style={linkStyle}>Inicio</Link></li>
+        <li><Link to="/lentes" style={linkStyle}>Tienda de Lentes</Link></li>
+        <li><Link to="/citas" style={linkStyle}>Agendar Examen</Link></li>
+        <li><Link to="/carrito" style={linkStyle}>🛒 ({carrito.length})</Link></li>
 
         {user ? (
-          <li style={{ position: "relative" }}>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#ffffff",
-                cursor: "pointer",
-                fontSize: "16px",
-                fontWeight: "bold",
-                display: "flex",
-                alignItems: "center",
-                gap: "5px"
-              }}>
+          <li style={{ position: "relative" }}
+              onMouseEnter={() => setMenuOpen(true)}
+              onMouseLeave={() => setMenuOpen(false)}>
+            <button style={userButton}>
               👤 {user.nombre}
             </button>
             {menuOpen && (
-              <ul style={{
-                position: "absolute",
-                top: "100%",
-                right: 0,
-                backgroundColor: "#ffffff",
-                color: "#0a0a1f",
-                listStyle: "none",
-                padding: "10px",
-                borderRadius: "5px",
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                minWidth: "180px"
-              }}>
+              <ul style={dropdownMenu}>
                 <li><Link to="/perfil" style={menuLink}>Perfil</Link></li>
                 <li><Link to="/compras" style={menuLink}>Mis Compras</Link></li>
                 <li><Link to="/seguimiento" style={menuLink}>Seguimiento de Compra</Link></li>
@@ -121,12 +83,77 @@ const Navbar = () => {
   );
 };
 
+// ✅ **Estilos**
+const navStyle = {
+  backgroundColor: "#ffffff",
+  color: "#0a0a1f",
+  padding: "10px 20px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  position: "relative",
+  borderBottom: "2px solid #00ffff",
+};
+
+const logoContainer = {
+  display: "flex",
+  alignItems: "center",
+};
+
+const logoStyle = {
+  height: "200px",
+  width: "auto",
+  position: "absolute",
+  top: "50%",
+  left: "10px",
+  transform: "translateY(-50%)",
+};
+
+const menuStyle = {
+  listStyle: "none",
+  display: "flex",
+  gap: "20px",
+  alignItems: "center",
+};
+
+const linkStyle = {
+  color: "#0a0a1f",
+  textDecoration: "none",
+  fontWeight: "bold",
+};
+
+const userButton = {
+  background: "none",
+  border: "none",
+  color: "#0a0a1f",
+  cursor: "pointer",
+  fontSize: "16px",
+  fontWeight: "bold",
+  display: "flex",
+  alignItems: "center",
+  gap: "5px",
+};
+
+const dropdownMenu = {
+  position: "absolute",
+  top: "100%",
+  right: 0,
+  backgroundColor: "#ffffff",
+  color: "#0a0a1f",
+  listStyle: "none",
+  padding: "10px",
+  borderRadius: "5px",
+  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+  minWidth: "180px",
+  zIndex: 10,
+};
+
 const menuLink = {
   textDecoration: "none",
   color: "#0a0a1f",
   display: "block",
   padding: "5px 10px",
-  cursor: "pointer"
+  cursor: "pointer",
 };
 
 const logoutButton = {
@@ -137,7 +164,7 @@ const logoutButton = {
   cursor: "pointer",
   padding: "5px 10px",
   width: "100%",
-  textAlign: "left"
+  textAlign: "left",
 };
 
 export default Navbar;

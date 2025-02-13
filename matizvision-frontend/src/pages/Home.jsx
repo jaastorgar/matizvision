@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import api from "../api/axiosConfig";
+import Slider from "react-slick"; // Carrusel moderno
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const Home = () => {
   const [productos, setProductos] = useState([]);
@@ -13,115 +16,182 @@ const Home = () => {
       .catch(error => console.error("Error al obtener productos destacados:", error));
   }, []);
 
+  // Configuración del Carrusel de Nombres
+  const carouselSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+  };
+
   return (
-    <div style={{ backgroundColor: "#F5F5F5", color: "#333", fontFamily: "Arial, sans-serif" }}>
+    <div style={pageStyle}>
       <Navbar />
 
-      {/* Hero Section */}
-      <header style={{ 
-        textAlign: "center", 
-        padding: "70px 20px", 
-        backgroundColor: "#008000", 
-        color: "#ffffff", 
-        borderBottom: "5px solid #005500",
-        borderRadius: "0 0 20px 20px"
-      }}>
-        <h1 style={{ fontSize: "2.8em", fontWeight: "bold" }}>Tu visión, nuestra prioridad</h1>
-        <p style={{ fontSize: "1.3em", marginBottom: "20px" }}>
-          Descubre los mejores productos ópticos y agenda tu consulta con nosotros.
-        </p>
-        <Link to="/citas" style={{ 
-          color: "#ffffff", 
-          backgroundColor: "#ff9900", 
-          padding: "15px 25px", 
-          borderRadius: "10px", 
-          textDecoration: "none",
-          fontWeight: "bold",
-          fontSize: "1.2em",
-          display: "inline-block",
-          transition: "0.3s",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)"
-        }}>
-          Agendar Cita
-        </Link>
-      </header>
+      {/* Carrusel de Nombres */}
+      <section style={heroSection}>
+        <Slider {...carouselSettings}>
+          <div style={carouselItem}><h2>Lentes de Sol</h2></div>
+          <div style={carouselItem}><h2>Lentes Ópticos</h2></div>
+          <div style={carouselItem}><h2>Lentes de Contacto</h2></div>
+          <div style={carouselItem}><h2>Accesorios para Lentes</h2></div>
+        </Slider>
+      </section>
 
-      {/* Productos Destacados */}
-      <section style={{ padding: "60px", textAlign: "center" }}>
-        <h2 style={{ color: "#008000", fontSize: "2.5em", marginBottom: "25px" }}>Productos Destacados</h2>
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", 
-          gap: "25px", 
-          justifyContent: "center" 
-        }}>
+      {/* Sección de Productos Destacados */}
+      <section style={productosSection}>
+        <h2 style={sectionTitle}>🔥 Productos Destacados</h2>
+        <div style={productosGrid}>
           {productos.length > 0 ? (
             productos.slice(0, 4).map(producto => (
-              <div key={producto.id} style={{ 
-                backgroundColor: "#ffffff", 
-                padding: "20px", 
-                borderRadius: "10px", 
-                textAlign: "center", 
-                boxShadow: "0px 5px 12px rgba(0, 0, 0, 0.15)",
-                transition: "transform 0.3s ease",
-                cursor: "pointer"
-              }}
-              onMouseOver={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-              onMouseOut={(e) => e.currentTarget.style.transform = "scale(1)"}>
-                <img src={producto.imagen} alt={producto.nombre} style={{ 
-                  width: "100%", 
-                  maxWidth: "230px", 
-                  borderRadius: "8px" 
-                }} />
-                <h3 style={{ margin: "15px 0", color: "#008000" }}>{producto.nombre}</h3>
-                <p style={{ fontSize: "1.3em", fontWeight: "bold", color: "#ff9900" }}>${producto.precio}</p>
+              <div key={producto.id} style={productoCard}>
+                <h3 style={productoNombre}>{producto.nombre}</h3>
+                <p style={productoPrecio}>${producto.precio}</p>
+                <button style={buttonComprar}>Comprar</button>
               </div>
             ))
           ) : (
-            <p style={{ color: "#333", fontSize: "1.2em" }}>Cargando productos...</p>
+            <p style={{ color: "#666", fontSize: "1.2em" }}>Cargando productos...</p>
           )}
         </div>
       </section>
 
-      {/* Beneficios */}
-      <section style={{ 
-        padding: "60px", 
-        backgroundColor: "#008000", 
-        color: "#ffffff", 
-        textAlign: "center",
-        borderRadius: "20px",
-        margin: "30px"
-      }}>
-        <h2 style={{ fontSize: "2.5em", marginBottom: "25px" }}>¿Por qué elegirnos?</h2>
-        <ul style={{ listStyle: "none", padding: 0, fontSize: "1.3em", lineHeight: "2" }}>
-          <li>✅ Atención personalizada</li>
-          <li>✅ Última tecnología en lentes</li>
-          <li>✅ Precios accesibles</li>
-          <li>✅ Diagnóstico preciso</li>
-        </ul>
-      </section>
-
-      {/* Testimonios */}
-      <section style={{ padding: "60px", textAlign: "center" }}>
-        <h2 style={{ color: "#008000", fontSize: "2.5em", marginBottom: "25px" }}>Lo que dicen nuestros clientes</h2>
-        <blockquote style={{ 
-          fontSize: "1.4em", 
-          fontStyle: "italic", 
-          color: "#333", 
-          maxWidth: "650px", 
-          margin: "0 auto", 
-          backgroundColor: "#ffffff", 
-          padding: "25px", 
-          borderRadius: "12px",
-          boxShadow: "0px 5px 12px rgba(0, 0, 0, 0.15)"
-        }}>
-          "La mejor óptica, servicio de calidad y lentes increíbles." - Juan Pérez
-        </blockquote>
+      {/* Sección de Garantías */}
+      <section style={garantiaSection}>
+        <h2 style={sectionTitle}>🛡️ Nuestras Garantías</h2>
+        <div style={garantiaGrid}>
+          <div style={garantiaCard}>
+            <h3>✅ Calidad Certificada</h3>
+            <p>Estándares ópticos con garantía de fábrica.</p>
+          </div>
+          <div style={garantiaCard}>
+            <h3>🔄 Cambios y Devoluciones</h3>
+            <p>30 días para cambios sin complicaciones.</p>
+          </div>
+          <div style={garantiaCard}>
+            <h3>💳 Pagos Seguros</h3>
+            <p>Transacciones protegidas con múltiples métodos de pago.</p>
+          </div>
+          <div style={garantiaCard}>
+            <h3>👓 Ajuste Perfecto</h3>
+            <p>Revisión gratuita para adaptación de lentes.</p>
+          </div>
+        </div>
       </section>
 
       <Footer />
     </div>
   );
+};
+
+// 🎨 **Estilos Modernos y Minimalistas**
+
+const pageStyle = {
+  backgroundColor: "#F5F5F5",
+  color: "#222",
+  fontFamily: "'Poppins', sans-serif",
+};
+
+const heroSection = {
+  position: "relative",
+  width: "100%",
+  overflow: "hidden",
+  textAlign: "center",
+  padding: "40px 0",
+};
+
+const carouselItem = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  height: "120px",
+  fontSize: "1.8em",
+  fontWeight: "bold",
+  background: "#008000",
+  color: "white",
+  borderRadius: "8px",
+};
+
+// Productos Destacados
+
+const productosSection = {
+  padding: "60px",
+  textAlign: "center",
+};
+
+const sectionTitle = {
+  color: "#008000",
+  fontSize: "2.5em",
+  marginBottom: "25px",
+};
+
+const productosGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+  gap: "20px",
+  justifyContent: "center",
+};
+
+const productoCard = {
+  backgroundColor: "#ffffff",
+  padding: "20px",
+  borderRadius: "12px",
+  textAlign: "center",
+  boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.1)",
+  transition: "transform 0.3s ease",
+  cursor: "pointer",
+};
+
+const productoNombre = {
+  margin: "15px 0",
+  color: "#008000",
+};
+
+const productoPrecio = {
+  fontSize: "1.3em",
+  fontWeight: "bold",
+  color: "#ff9900",
+};
+
+const buttonComprar = {
+  backgroundColor: "#008000",
+  color: "#ffffff",
+  padding: "10px 15px",
+  borderRadius: "8px",
+  border: "none",
+  fontSize: "1em",
+  fontWeight: "bold",
+  marginTop: "10px",
+  cursor: "pointer",
+  transition: "0.3s",
+};
+
+// Garantías
+
+const garantiaSection = {
+  padding: "60px",
+  backgroundColor: "#ffffff",
+  textAlign: "center",
+};
+
+const garantiaGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+  gap: "20px",
+  justifyContent: "center",
+};
+
+const garantiaCard = {
+  backgroundColor: "#F5F5F5",
+  padding: "20px",
+  borderRadius: "10px",
+  textAlign: "center",
+  boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.1)",
+  transition: "transform 0.3s ease",
+  cursor: "pointer",
 };
 
 export default Home;
