@@ -42,9 +42,9 @@ const MisCompras = () => {
 
                         <h4>Productos:</h4>
                         <ul>
-                            {compra.detalles.map((detalle) => (
+                            {compra.DetalleCompras.map((detalle) => (
                                 <li key={detalle.productoId}>
-                                    {detalle.productoNombre} - {detalle.cantidad} x ${detalle.precioUnitario} = ${detalle.cantidad * detalle.precioUnitario}
+                                    {detalle.Producto.nombre} - {detalle.cantidad} x ${detalle.Producto.precio} = ${detalle.cantidad * detalle.Producto.precio}
                                 </li>
                             ))}
                         </ul>

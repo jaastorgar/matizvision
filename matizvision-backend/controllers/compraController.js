@@ -59,14 +59,15 @@ exports.obtenerComprasPorUsuario = async (req, res) => {
             include: [
                 {
                     model: DetalleCompra,
-                    as: "detalles",
+                    as: "DetalleCompras",
                     include: [{ model: Producto, attributes: ["nombre", "precio"] }]
                 }
             ]
         });
 
+        // Si no hay compras, devolver un array vacío
         if (!compras || compras.length === 0) {
-            return res.status(404).json({ msg: "No hay compras registradas para este usuario." });
+            return res.status(200).json([]);
         }
 
         res.json(compras);
