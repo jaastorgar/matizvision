@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import api from "../api/axiosConfig";
-import Slider from "react-slick"; // Carrusel moderno
+import Slider from "react-slick"; // Carrusel de Testimonios
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -15,7 +15,7 @@ const Home = () => {
     // Obtener productos destacados
     api.get("/products")
       .then(response => setProductos(response.data))
-      .catch(error => console.error("Error al obtener productos destacados:", error));
+      .catch(error => console.error("Error al obtener productos:", error));
 
     // Obtener testimonios de clientes
     api.get("/testimonios")
@@ -23,30 +23,29 @@ const Home = () => {
       .catch(error => console.error("Error al obtener testimonios:", error));
   }, []);
 
-  // Configuración del Carrusel de Nombres
-  const carouselSettings = {
+  // Configuración del Carrusel de Testimonios
+  const carouselTestimonios = {
     dots: true,
     infinite: true,
-    speed: 500,
-    slidesToShow: 1,
+    speed: 800,
+    slidesToShow: 2,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 4000,
+    cssEase: "linear",
+    responsive: [
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 1,
+        },
+      },
+    ],
   };
 
   return (
     <div style={pageStyle}>
       <Navbar />
-
-      {/* Carrusel de Nombres */}
-      <section style={heroSection}>
-        <Slider {...carouselSettings}>
-          <div style={carouselItem}><h2>Lentes de Sol</h2></div>
-          <div style={carouselItem}><h2>Lentes Ópticos</h2></div>
-          <div style={carouselItem}><h2>Lentes de Contacto</h2></div>
-          <div style={carouselItem}><h2>Accesorios para Lentes</h2></div>
-        </Slider>
-      </section>
 
       {/* Sección de Productos Destacados */}
       <section style={productosSection}>
@@ -69,18 +68,18 @@ const Home = () => {
       {/* Sección de Testimonios */}
       <section style={testimoniosSection}>
         <h2 style={sectionTitle}>💬 Testimonios de nuestros clientes</h2>
-        <div style={testimoniosGrid}>
+        <Slider {...carouselTestimonios}>
           {testimonios.length > 0 ? (
             testimonios.map(testimonio => (
               <div key={testimonio.id} style={testimonioCard}>
                 <h3>{testimonio.nombre}</h3>
-                <p>"{testimonio.mensaje}"</p>
+                <p>"{testimonio.comentario}"</p>
               </div>
             ))
           ) : (
             <p style={{ color: "#666", fontSize: "1.2em" }}>Aún no hay testimonios.</p>
           )}
-        </div>
+        </Slider>
         <Link to="/dejar-testimonio">
           <button style={buttonTestimonio}>📝 Dejar Testimonio</button>
         </Link>
@@ -119,26 +118,6 @@ const pageStyle = {
   backgroundColor: "#F5F5F5",
   color: "#222",
   fontFamily: "'Poppins', sans-serif",
-};
-
-const heroSection = {
-  position: "relative",
-  width: "100%",
-  overflow: "hidden",
-  textAlign: "center",
-  padding: "40px 0",
-};
-
-const carouselItem = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  height: "120px",
-  fontSize: "1.8em",
-  fontWeight: "bold",
-  background: "#008000",
-  color: "white",
-  borderRadius: "8px",
 };
 
 // Productos Destacados
@@ -201,13 +180,6 @@ const testimoniosSection = {
   backgroundColor: "#fff",
 };
 
-const testimoniosGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-  gap: "20px",
-  justifyContent: "center",
-};
-
 const testimonioCard = {
   backgroundColor: "#F5F5F5",
   padding: "20px",
@@ -231,6 +203,7 @@ const buttonTestimonio = {
   transition: "0.3s",
 };
 
+// Estilos para Garantías
 const garantiaSection = {
   padding: "60px",
   textAlign: "center",
