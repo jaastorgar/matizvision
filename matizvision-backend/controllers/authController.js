@@ -6,56 +6,60 @@ exports.register = async (req, res) => {
     try {
         console.log("📩 Datos recibidos en el backend:", req.body);
 
-        const { nombre, apellido, telefono, email, password, rol } = req.body;
+        const { nombre, apellido_paterno, apellido_materno, rut, dv, telefono, email, password } = req.body;
 
-        if (!email || !password || !nombre || !apellido || !telefono) {
+        if (!nombre || !apellido_paterno || !apellido_materno || !rut || !dv || !telefono || !email || !password) {
             return res.status(400).json({ msg: "Todos los campos son obligatorios" });
         }
 
-        // Verificar si el usuario ya existe
-        let userExists = await Usuario.findOne({ where: { email } });
-        if (userExists) {
-            console.log("⚠️ El usuario ya existe en la base de datos");
-            return res.status(400).json({ msg: "El usuario ya está registrado" });
-        }
-
-        // Encriptar contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Crear usuario en la base de datos
-        const user = await Usuario.create({
+        const nuevoUsuario = await Usuario.create({
             nombre,
-            apellido,
+            apellido_paterno,
+            apellido_materno,
+            rut,
+            dv,
             telefono,
             email,
             password: hashedPassword,
-            rol: rol || 'cliente'
         });
 
-        console.log("✅ Usuario registrado correctamente:", user);
-        res.status(201).json({ msg: "Usuario registrado con éxito", usuario: user });
+        res.status(201).json({ msg: "Usuario registrado con éxito", usuario: nuevoUsuario });
     } catch (error) {
-        console.error("❌ Error al registrar usuario:", error);
-        res.status(500).json({ msg: "Error al registrar usuario", error: error.message });
+        console.error("❌ Error en el registro:", error);
+        res.status(500).json({ msg: "Error en el servidor", error });
     }
 };
 
 exports.login = async (req, res) => {
     try {
+        console.log("📩 Intento de inicio de sesión:", req.body.email);
+
         const { email, password } = req.body;
 
-        // Buscar usuario
+        if (!email || !password) {
+            console.log("❌ Faltan credenciales");
+            return res.status(400).json({ msg: "Correo y contraseña son obligatorios" });
+        }
+
         const user = await Usuario.findOne({ where: { email } });
-        if (!user) return res.status(400).json({ msg: "Usuario no encontrado" });
+        if (!user) {
+            console.log("❌ Usuario no encontrado:", email);
+            return res.status(400).json({ msg: "Usuario no encontrado" });
+        }
 
-        // Comparar contraseñas
+        console.log("🔑 Comparando contraseñas...");
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ msg: "Contraseña incorrecta" });
+        if (!isMatch) {
+            console.log("❌ Contraseña incorrecta para el usuario:", email);
+            return res.status(400).json({ msg: "Contraseña incorrecta" });
+        }
 
-        // Generar token
+        console.log("🔑 Generando token de autenticación...");
         const token = jwt.sign({ id: user.id, rol: user.rol }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        // Enviar usuario junto con el token
+        console.log("✅ Inicio de sesión exitoso para:", email);
         res.json({
             msg: "Inicio de sesión exitoso",
             token,
@@ -66,7 +70,9 @@ exports.login = async (req, res) => {
                 rol: user.rol
             }
         });
+
     } catch (error) {
+        console.log("❌ Error al iniciar sesión:", error);
         res.status(500).json({ msg: "Error al iniciar sesión", error });
     }
 };

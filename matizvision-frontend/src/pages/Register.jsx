@@ -1,127 +1,125 @@
 import React, { useState } from "react";
+import axios from "../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axiosConfig";
 
 const Register = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    nombre: "",
-    apellido: "",
-    telefono: "",
-    email: "",
-    password: "",
-  });
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        nombre: "",
+        apellido_paterno: "",
+        apellido_materno: "",
+        rut: "",
+        dv: "",
+        telefono: "",
+        email: "",
+        password: "",
+    });
 
-  const [mensaje, setMensaje] = useState("");
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
-  // Manejar cambios en los inputs
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post("/auth/register", formData);
+            alert(response.data.msg);
+            navigate("/login");
+        } catch (error) {
+            console.error("❌ Error en el registro:", error.response?.data || error.message);
+            alert(error.response?.data?.msg || "Error al registrar usuario.");
+        }
+    };
 
-  // Enviar datos al backend
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    return (
+        <div style={styles.container}>
+            <div style={styles.card}>
+                <img src="/matiz.png" alt="Logo de Matiz Vision" style={styles.logo} />
+                <h2 style={styles.title}>Registro de Cliente</h2>
+                <form onSubmit={handleSubmit} style={styles.form}>
+                    <input type="text" name="nombre" placeholder="Nombre" value={formData.nombre} onChange={handleChange} required style={styles.input} />
 
-    try {
-      const response = await api.post("/auth/register", formData);
-      setMensaje("✅ Registro exitoso. Redirigiendo...");
+                    <div style={styles.inputGroup}>
+                        <input type="text" name="apellido_paterno" placeholder="Apellido Paterno" value={formData.apellido_paterno} onChange={handleChange} required style={styles.input} />
+                        <input type="text" name="apellido_materno" placeholder="Apellido Materno" value={formData.apellido_materno} onChange={handleChange} required style={styles.input} />
+                    </div>
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+                    <div style={styles.inputGroup}>
+                        <input type="text" name="rut" placeholder="RUT (Sin puntos ni guion)" value={formData.rut} onChange={handleChange} required style={styles.input} />
+                        <input type="text" name="dv" placeholder="Dígito Verificador" value={formData.dv} onChange={handleChange} required style={styles.input} />
+                    </div>
 
-    } catch (error) {
-      setMensaje("❌ Error al registrar usuario. Verifica los datos.");
-    }
-  };
+                    <div style={styles.inputGroup}>
+                        <input type="text" name="telefono" placeholder="Teléfono" value={formData.telefono} onChange={handleChange} required style={styles.input} />
+                        <input type="email" name="email" placeholder="Correo Electrónico" value={formData.email} onChange={handleChange} required style={styles.input} />
+                    </div>
 
-  return (
-    <div style={containerStyle}>
-      <div style={formContainer}>
-        <h2 style={titleStyle}>Registro de Cliente</h2>
+                    <input type="password" name="password" placeholder="Contraseña" value={formData.password} onChange={handleChange} required style={styles.input} />
 
-        <form onSubmit={handleSubmit} style={formStyle}>
-          <input type="text" name="nombre" placeholder="Nombre" value={formData.nombre} onChange={handleChange} required style={inputStyle} />
-          <input type="text" name="apellido" placeholder="Apellido" value={formData.apellido} onChange={handleChange} required style={inputStyle} />
-          <input type="tel" name="telefono" placeholder="Teléfono" value={formData.telefono} onChange={handleChange} required style={inputStyle} />
-          <input type="email" name="email" placeholder="Correo Electrónico" value={formData.email} onChange={handleChange} required style={inputStyle} />
-          <input type="password" name="password" placeholder="Contraseña" value={formData.password} onChange={handleChange} required style={inputStyle} />
-
-          <button type="submit" style={buttonStyle}>Registrarse</button>
-        </form>
-
-        {mensaje && <p style={mensaje.includes("✅") ? successStyle : errorStyle}>{mensaje}</p>}
-
-        <p style={{ textAlign: "center", marginTop: "10px" }}>
-          ¿Ya tienes cuenta? <a href="/login" style={{ color: "#008000", fontWeight: "bold" }}>Inicia sesión aquí</a>
-        </p>
-      </div>
-    </div>
-  );
+                    <button type="submit" style={styles.button}>Registrarse</button>
+                </form>
+            </div>
+        </div>
+    );
 };
 
-// **Estilos en JS**
-const containerStyle = {
-  backgroundColor: "#D3D3D3",
-  fontFamily: "Arial, sans-serif",
-  minHeight: "100vh",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-};
-
-const formContainer = {
-  backgroundColor: "#ffffff",
-  padding: "30px",
-  borderRadius: "10px",
-  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-  width: "90%",
-  maxWidth: "400px",
-  textAlign: "center",
-};
-
-const titleStyle = {
-  color: "#008000",
-  fontSize: "1.8em",
-  marginBottom: "20px",
-};
-
-const formStyle = {
-  display: "flex",
-  flexDirection: "column",
-};
-
-const inputStyle = {
-  padding: "10px",
-  margin: "10px 0",
-  borderRadius: "5px",
-  border: "1px solid #008000",
-};
-
-const buttonStyle = {
-  backgroundColor: "#008000",
-  color: "#ffffff",
-  padding: "10px",
-  borderRadius: "5px",
-  border: "none",
-  cursor: "pointer",
-  fontSize: "1.2em",
-  fontWeight: "bold",
-};
-
-const successStyle = {
-  color: "#008000",
-  fontWeight: "bold",
-  textAlign: "center",
-  marginTop: "10px",
-};
-
-const errorStyle = {
-  color: "#ff0000",
-  fontWeight: "bold",
-  textAlign: "center",
-  marginTop: "10px",
+// **Estilos**
+const styles = {
+    container: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        backgroundColor: "#F3F4F6",
+    },
+    card: {
+        background: "#ffffff",
+        padding: "40px",
+        borderRadius: "10px",
+        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+        textAlign: "center",
+        width: "400px",
+    },
+    logo: {
+        width: "150px",
+        marginBottom: "20px",
+    },
+    title: {
+        color: "#008000",
+        fontWeight: "bold",
+        marginBottom: "20px",
+        fontSize: "22px",
+    },
+    form: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "15px",
+    },
+    inputGroup: {
+        display: "flex",
+        justifyContent: "space-between",
+        gap: "10px",
+    },
+    input: {
+        width: "100%",
+        padding: "12px",
+        border: "1px solid #008000",
+        borderRadius: "5px",
+        fontSize: "14px",
+    },
+    button: {
+        width: "100%",
+        backgroundColor: "#008000",
+        color: "#ffffff",
+        padding: "12px",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer",
+        marginTop: "15px",
+        fontWeight: "bold",
+        fontSize: "16px",
+        transition: "background 0.3s",
+    },
 };
 
 export default Register;
