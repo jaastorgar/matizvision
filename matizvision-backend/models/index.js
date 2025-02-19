@@ -8,6 +8,7 @@ const Compra = require('./compra');
 const DetalleCompra = require('./detallecompra');
 const Cita = require('./cita');
 const AdminLogs = require('./adminlogs');
+const Testimonio = require('./testimonio');
 
 // Definir relaciones
 Usuario.hasMany(Compra, { foreignKey: 'usuarioId' });
@@ -22,6 +23,9 @@ DetalleCompra.belongsTo(Producto, { foreignKey: 'productoId' });
 Usuario.hasMany(Cita, { foreignKey: 'usuarioId' });
 Cita.belongsTo(Usuario, { foreignKey: 'usuarioId' });
 
+Usuario.hasMany(Testimonio, { foreignKey: 'usuarioId' });
+Testimonio.belongsTo(Usuario, { foreignKey: 'usuarioId' });
+
 // Exportar los modelos
 module.exports = {
     sequelize,
@@ -30,5 +34,6 @@ module.exports = {
     Compra,
     DetalleCompra,
     Cita,
-    AdminLogs
+    AdminLogs,
+    Testimonio
 };

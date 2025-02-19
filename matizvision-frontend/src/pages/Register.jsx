@@ -24,13 +24,13 @@ const Register = () => {
     e.preventDefault();
 
     try {
-      await api.post("/auth/register", formData);
+      const response = await api.post("/auth/register", formData);
       setMensaje("✅ Registro exitoso. Redirigiendo...");
-      
+
       setTimeout(() => {
         navigate("/login");
       }, 2000);
-      
+
     } catch (error) {
       setMensaje("❌ Error al registrar usuario. Verifica los datos.");
     }

@@ -23,6 +23,7 @@ app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/citas', require('./routes/citaRoutes'));
 app.use('/api/compras', require('./routes/compraRoutes'));
 app.use('/api/adminlogs', require('./routes/adminLogsRoutes'));
+app.use('/api/testimonios', require('./routes/testimonioRoutes'));
 
 // ✅ Conectar Base de Datos
 sequelize.sync().then(() => console.log('Base de datos sincronizada'));

@@ -9,11 +9,18 @@ import "slick-carousel/slick/slick-theme.css";
 
 const Home = () => {
   const [productos, setProductos] = useState([]);
+  const [testimonios, setTestimonios] = useState([]);
 
   useEffect(() => {
+    // Obtener productos destacados
     api.get("/products")
       .then(response => setProductos(response.data))
       .catch(error => console.error("Error al obtener productos destacados:", error));
+
+    // Obtener testimonios de clientes
+    api.get("/testimonios")
+      .then(response => setTestimonios(response.data))
+      .catch(error => console.error("Error al obtener testimonios:", error));
   }, []);
 
   // Configuración del Carrusel de Nombres
@@ -59,6 +66,26 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Sección de Testimonios */}
+      <section style={testimoniosSection}>
+        <h2 style={sectionTitle}>💬 Testimonios de nuestros clientes</h2>
+        <div style={testimoniosGrid}>
+          {testimonios.length > 0 ? (
+            testimonios.map(testimonio => (
+              <div key={testimonio.id} style={testimonioCard}>
+                <h3>{testimonio.nombre}</h3>
+                <p>"{testimonio.mensaje}"</p>
+              </div>
+            ))
+          ) : (
+            <p style={{ color: "#666", fontSize: "1.2em" }}>Aún no hay testimonios.</p>
+          )}
+        </div>
+        <Link to="/dejar-testimonio">
+          <button style={buttonTestimonio}>📝 Dejar Testimonio</button>
+        </Link>
+      </section>
+
       {/* Sección de Garantías */}
       <section style={garantiaSection}>
         <h2 style={sectionTitle}>🛡️ Nuestras Garantías</h2>
@@ -88,7 +115,6 @@ const Home = () => {
 };
 
 // 🎨 **Estilos Modernos y Minimalistas**
-
 const pageStyle = {
   backgroundColor: "#F5F5F5",
   color: "#222",
@@ -116,7 +142,6 @@ const carouselItem = {
 };
 
 // Productos Destacados
-
 const productosSection = {
   padding: "60px",
   textAlign: "center",
@@ -169,22 +194,21 @@ const buttonComprar = {
   transition: "0.3s",
 };
 
-// Garantías
-
-const garantiaSection = {
+// Estilos para testimonios
+const testimoniosSection = {
   padding: "60px",
-  backgroundColor: "#ffffff",
   textAlign: "center",
+  backgroundColor: "#fff",
 };
 
-const garantiaGrid = {
+const testimoniosGrid = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
   gap: "20px",
   justifyContent: "center",
 };
 
-const garantiaCard = {
+const testimonioCard = {
   backgroundColor: "#F5F5F5",
   padding: "20px",
   borderRadius: "10px",
@@ -192,6 +216,48 @@ const garantiaCard = {
   boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.1)",
   transition: "transform 0.3s ease",
   cursor: "pointer",
+};
+
+const buttonTestimonio = {
+  backgroundColor: "#008000",
+  color: "#ffffff",
+  padding: "12px 20px",
+  borderRadius: "8px",
+  border: "none",
+  fontSize: "1em",
+  fontWeight: "bold",
+  marginTop: "20px",
+  cursor: "pointer",
+  transition: "0.3s",
+};
+
+const garantiaSection = {
+  padding: "60px",
+  textAlign: "center",
+  backgroundColor: "#f8f9fa",
+  borderRadius: "12px",
+  boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.1)",
+  marginTop: "50px",
+};
+
+const garantiaGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+  gap: "20px",
+  justifyContent: "center",
+  marginTop: "30px",
+};
+
+const garantiaCard = {
+  backgroundColor: "#ffffff",
+  padding: "20px",
+  borderRadius: "10px",
+  textAlign: "center",
+  boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+  transition: "transform 0.3s ease",
+  cursor: "pointer",
+  fontSize: "1.1em",
+  fontWeight: "bold",
 };
 
 export default Home;

@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import CitasAgendadas from './pages/CitasAgendadas';
 import Perfil from './pages/Perfil';
 import MisCompras from './pages/MisCompras';
+import DejarTestimonio from './pages/DejarTestimonio';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       <Route path="/citas-agendadas" element={<CitasAgendadas />} />
       <Route path="/perfil" element={<Perfil />} />
       <Route path="/compras" element={<MisCompras />} />
+      <Route path="/dejar-testimonio" element={<DejarTestimonio />} />
     </Routes>
   );
 }
