@@ -1,283 +1,186 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../api/axiosConfig";
+import axios from "../api/axiosConfig";
 
 const Perfil = () => {
-  const navigate = useNavigate();
-  const [usuario, setUsuario] = useState(null);
-  const [rut, setRut] = useState("");
-  const [dv, setDv] = useState("");
-  const [nombre, setNombre] = useState("");
-  const [apellidoPaterno, setApellidoPaterno] = useState("");
-  const [apellidoMaterno, setApellidoMaterno] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [direccion, setDireccion] = useState("");
-  const [notificaciones, setNotificaciones] = useState(false);
-  const [modoOscuro, setModoOscuro] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+    const [activeSection, setActiveSection] = useState("perfil"); // Maneja la sección activa
 
-  useEffect(() => {
-    const fetchUsuario = async () => {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      if (!storedUser) {
-        navigate("/login");
-        return;
-      }
-      setUsuario(storedUser);
-      setRut(storedUser.rut || "");
-      setDv(storedUser.dv || "");
-      setNombre(storedUser.nombre);
-      setApellidoPaterno(storedUser.apellidoPaterno || "");
-      setApellidoMaterno(storedUser.apellidoMaterno || "");
-      setEmail(storedUser.email);
-      setTelefono(storedUser.telefono || "");
-      setDireccion(storedUser.direccion || "");
-    };
-    fetchUsuario();
-  }, [navigate]);
+    const [userData, setUserData] = useState({
+        nombre: "",
+        apellido_paterno: "",
+        apellido_materno: "",
+        rut: "",
+        dv: "",
+        telefono: "",
+        email: "",
+        direccion: "",
+    });
 
-  const handleActualizarPerfil = async () => {
-    try {
-      await api.put(`/usuarios/${usuario.id}`, {
-        rut,
-        dv,
-        nombre,
-        apellidoPaterno,
-        apellidoMaterno,
-        email,
-        telefono,
-        direccion,
-      });
-      alert("✅ Perfil actualizado correctamente");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...usuario,
-          rut,
-          dv,
-          nombre,
-          apellidoPaterno,
-          apellidoMaterno,
-          email,
-          telefono,
-          direccion,
+    useEffect(() => {
+        axios.get("/auth/profile", {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         })
-      );
-    } catch (error) {
-      alert("❌ Error al actualizar perfil");
-    }
-  };
+        .then(response => {
+            setUserData(response.data);
+        })
+        .catch(error => {
+            console.error("❌ Error al obtener datos del usuario:", error);
+            alert("No se pudo cargar la información del perfil.");
+        });
+    }, []);
 
-  const handleCambiarContraseña = async () => {
-    if (password !== confirmPassword) {
-      alert("⚠️ Las contraseñas no coinciden");
-      return;
-    }
-    try {
-      await api.put(`/usuarios/${usuario.id}/cambiar-password`, { password });
-      alert("✅ Contraseña actualizada correctamente");
-      setPassword("");
-      setConfirmPassword("");
-    } catch (error) {
-      alert("❌ Error al cambiar contraseña");
-    }
-  };
+    const handleChange = (e) => {
+        setUserData({ ...userData, [e.target.name]: e.target.value });
+    };
 
-  const handleEliminarCuenta = async () => {
-    const confirmacion = window.confirm(
-      "⚠️ ¿Estás seguro de que quieres eliminar tu cuenta?"
-    );
-    if (confirmacion) {
-      try {
-        await api.delete(`/usuarios/${usuario.id}`);
-        alert("🗑️ Cuenta eliminada correctamente");
-        localStorage.removeItem("user");
-        navigate("/register");
-      } catch (error) {
-        alert("❌ Error al eliminar cuenta");
-      }
-    }
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.put("/auth/update-profile", userData);
+            alert(response.data.msg);
+        } catch (error) {
+            console.error("❌ Error al actualizar perfil:", error.response?.data || error.message);
+            alert(error.response?.data?.msg || "Error al actualizar el perfil.");
+        }
+    };
 
-  return (
-    <div style={modoOscuro ? darkContainerStyle : containerStyle}>
-      <h2 style={titleStyle}>Perfil</h2>
+    return (
+        <div style={styles.container}>
+            {/* Barra lateral */}
+            <div style={styles.sidebar}>
+                <h2 style={styles.title}>Hola, {userData.nombre}</h2>
+                <ul style={styles.menu}>
+                    <li style={activeSection === "perfil" ? styles.menuItemActive : styles.menuItem} onClick={() => setActiveSection("perfil")}>📌 Mi Perfil</li>
+                    <li style={activeSection === "compras" ? styles.menuItemActive : styles.menuItem} onClick={() => setActiveSection("compras")}>🛒 Mis Compras</li>
+                    <li style={activeSection === "ayuda" ? styles.menuItemActive : styles.menuItem} onClick={() => setActiveSection("ayuda")}>❓ Ayuda</li>
+                    <li style={activeSection === "configurar" ? styles.menuItemActive : styles.menuItem} onClick={() => setActiveSection("configurar")}>⚙️ Configurar Cuenta</li>
+                </ul>
+            </div>
 
-      <div style={inputGroupStyle}>
-        <label>RUT</label>
-        <div style={{ display: "flex" }}>
-          <input
-            type="text"
-            value={rut}
-            onChange={(e) => setRut(e.target.value)}
-            style={{ ...inputStyle, width: "80%" }}
-          />
-          <input
-            type="text"
-            value={dv}
-            onChange={(e) => setDv(e.target.value)}
-            style={{ ...inputStyle, width: "20%" }}
-            placeholder="DV"
-          />
+            {/* Contenido dinámico */}
+            <div style={styles.content}>
+                {activeSection === "perfil" && (
+                    <div>
+                        <h2 style={styles.profileTitle}>Datos Personales</h2>
+                        <form onSubmit={handleSubmit} style={styles.form}>
+                            <div style={styles.inputGroup}>
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Nombre</label>
+                                    <input type="text" name="nombre" value={userData.nombre} onChange={handleChange} style={styles.input} />
+                                </div>
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Apellido Paterno</label>
+                                    <input type="text" name="apellido_paterno" value={userData.apellido_paterno} onChange={handleChange} style={styles.input} />
+                                </div>
+                                <div style={styles.inputContainer}>
+                                    <label style={styles.label}>Apellido Materno</label>
+                                    <input type="text" name="apellido_materno" value={userData.apellido_materno} onChange={handleChange} style={styles.input} />
+                                </div>
+                            </div>
+                            <button type="submit" style={styles.button}>Actualizar Perfil</button>
+                        </form>
+                    </div>
+                )}
+
+                {activeSection === "compras" && <h2 style={styles.sectionTitle}>📦 Aquí verás tus compras</h2>}
+                {activeSection === "ayuda" && <h2 style={styles.sectionTitle}>❓ Centro de Ayuda</h2>}
+                {activeSection === "configurar" && <h2 style={styles.sectionTitle}>⚙️ Configuración de la Cuenta</h2>}
+            </div>
         </div>
-      </div>
-
-      <label>Nombre</label>
-      <input
-        type="text"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-        style={inputStyle}
-      />
-
-      <label>Apellido Paterno</label>
-      <input
-        type="text"
-        value={apellidoPaterno}
-        onChange={(e) => setApellidoPaterno(e.target.value)}
-        style={inputStyle}
-      />
-
-      <label>Apellido Materno</label>
-      <input
-        type="text"
-        value={apellidoMaterno}
-        onChange={(e) => setApellidoMaterno(e.target.value)}
-        style={inputStyle}
-      />
-
-      <label>Correo Electrónico</label>
-      <input type="email" value={email} disabled style={inputStyle} />
-
-      <label>Teléfono</label>
-      <input
-        type="text"
-        value={telefono}
-        onChange={(e) => setTelefono(e.target.value)}
-        style={inputStyle}
-      />
-
-      <label>Dirección de Envío</label>
-      <input
-        type="text"
-        value={direccion}
-        onChange={(e) => setDireccion(e.target.value)}
-        style={inputStyle}
-      />
-
-      <button onClick={handleActualizarPerfil} style={buttonStyle}>
-        Actualizar Perfil
-      </button>
-
-      <h3 style={sectionTitleStyle}>Configuración</h3>
-      <label>
-        <input
-          type="checkbox"
-          checked={notificaciones}
-          onChange={() => setNotificaciones(!notificaciones)}
-        />
-        &nbsp; Recibir notificaciones por correo
-      </label>
-
-      <label>
-        <input
-          type="checkbox"
-          checked={modoOscuro}
-          onChange={() => setModoOscuro(!modoOscuro)}
-        />
-        &nbsp; Activar Modo Oscuro
-      </label>
-
-      <h3 style={sectionTitleStyle}>Cambio de Contraseña</h3>
-      <input
-        type="password"
-        placeholder="Nueva contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={inputStyle}
-      />
-      <input
-        type="password"
-        placeholder="Confirmar nueva contraseña"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        style={inputStyle}
-      />
-      <button onClick={handleCambiarContraseña} style={buttonStyle}>
-        Cambiar Contraseña
-      </button>
-
-      <button onClick={handleEliminarCuenta} style={deleteButtonStyle}>
-        Eliminar Cuenta
-      </button>
-    </div>
-  );
+    );
 };
 
-// Estilos actualizados
-const containerStyle = {
-  maxWidth: "600px",
-  margin: "50px auto",
-  padding: "25px",
-  border: "1px solid #ddd",
-  borderRadius: "10px",
-  backgroundColor: "#ffffff",
-  boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-};
-
-const darkContainerStyle = {
-  ...containerStyle,
-  backgroundColor: "#333",
-  color: "#fff",
-  border: "1px solid #666",
-};
-
-const titleStyle = {
-  textAlign: "center",
-  color: "#0a0a1f",
-  marginBottom: "20px",
-  fontSize: "22px",
-  fontWeight: "bold",
-};
-
-const inputGroupStyle = {
-  marginBottom: "15px",
-  display: "flex",
-  flexDirection: "column",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px",
-  margin: "5px 0",
-  border: "1px solid #ddd",
-  borderRadius: "5px",
-  fontSize: "16px",
-};
-
-const buttonStyle = {
-  width: "100%",
-  padding: "12px",
-  marginTop: "10px",
-  backgroundColor: "#0a0a1f",
-  color: "#ffffff",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
-  fontSize: "16px",
-};
-
-const deleteButtonStyle = {
-  ...buttonStyle,
-  backgroundColor: "#d9534f",
-};
-
-const sectionTitleStyle = {
-  marginTop: "20px",
-  fontSize: "18px",
-  color: "#0a0a1f",
+// **Estilos**
+const styles = {
+    container: {
+        display: "flex",
+        height: "100vh",
+        backgroundColor: "#f8f9fa",
+    },
+    sidebar: {
+        width: "250px",
+        background: "#ffffff",
+        padding: "20px",
+        borderRight: "1px solid #ddd",
+        boxShadow: "2px 0 5px rgba(0,0,0,0.1)",
+    },
+    title: {
+        fontSize: "20px",
+        fontWeight: "bold",
+        color: "#333",
+        marginBottom: "20px",
+    },
+    menu: {
+        listStyle: "none",
+        padding: 0,
+    },
+    menuItem: {
+        padding: "10px",
+        cursor: "pointer",
+        borderBottom: "1px solid #eee",
+        color: "#555",
+    },
+    menuItemActive: {
+        padding: "10px",
+        cursor: "pointer",
+        borderBottom: "1px solid #eee",
+        color: "#008000",
+        fontWeight: "bold",
+    },
+    content: {
+        flex: 1,
+        padding: "30px",
+    },
+    profileTitle: {
+        fontSize: "22px",
+        fontWeight: "bold",
+        marginBottom: "20px",
+    },
+    sectionTitle: {
+        fontSize: "18px",
+        fontWeight: "bold",
+        textAlign: "center",
+        color: "#333",
+    },
+    form: {
+        background: "#ffffff",
+        padding: "20px",
+        borderRadius: "10px",
+        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+    },
+    inputGroup: {
+        display: "flex",
+        gap: "10px",
+        marginBottom: "15px",
+    },
+    inputContainer: {
+        flex: 1,
+    },
+    label: {
+        display: "block",
+        fontSize: "14px",
+        fontWeight: "bold",
+        marginBottom: "5px",
+        color: "#555",
+    },
+    input: {
+        width: "100%",
+        padding: "10px",
+        border: "1px solid #ccc",
+        borderRadius: "5px",
+        fontSize: "14px",
+    },
+    button: {
+        width: "100%",
+        backgroundColor: "#008000",
+        color: "#ffffff",
+        padding: "12px",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer",
+        fontSize: "16px",
+        fontWeight: "bold",
+        transition: "background 0.3s",
+    },
 };
 
 export default Perfil;

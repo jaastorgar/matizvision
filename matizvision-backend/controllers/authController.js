@@ -76,3 +76,20 @@ exports.login = async (req, res) => {
         res.status(500).json({ msg: "Error al iniciar sesión", error });
     }
 };
+
+exports.getProfile = async (req, res) => {
+    try {
+        const usuario = await Usuario.findByPk(req.user.id, {
+            attributes: ["nombre", "apellido_paterno", "apellido_materno", "rut", "dv", "telefono", "email"]
+        });
+
+        if (!usuario) {
+            return res.status(404).json({ msg: "Usuario no encontrado" });
+        }
+
+        res.json(usuario);
+    } catch (error) {
+        console.error("❌ Error al obtener perfil:", error);
+        res.status(500).json({ msg: "Error en el servidor", error });
+    }
+};
