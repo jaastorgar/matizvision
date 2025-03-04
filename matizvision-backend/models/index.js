@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-// Importar modelos
+// Importar modelos existentes
 const Usuario = require('./usuario');
 const Producto = require('./producto');
 const Compra = require('./compra');
@@ -9,6 +9,7 @@ const DetalleCompra = require('./detallecompra');
 const Cita = require('./cita');
 const AdminLogs = require('./adminlogs');
 const Testimonio = require('./testimonio');
+const PanelSettings = require('./panelsettings');
 
 // Definir relaciones
 Usuario.hasMany(Compra, { foreignKey: 'usuarioId' });
@@ -26,7 +27,7 @@ Cita.belongsTo(Usuario, { foreignKey: 'usuarioId' });
 Usuario.hasMany(Testimonio, { foreignKey: 'usuarioId' });
 Testimonio.belongsTo(Usuario, { foreignKey: 'usuarioId' });
 
-// Exportar los modelos
+// Exportar modelos
 module.exports = {
     sequelize,
     Usuario,
@@ -35,5 +36,6 @@ module.exports = {
     DetalleCompra,
     Cita,
     AdminLogs,
-    Testimonio
+    Testimonio,
+    PanelSettings
 };

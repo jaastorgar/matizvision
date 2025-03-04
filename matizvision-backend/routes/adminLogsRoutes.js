@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const adminLogsController = require('../controllers/adminLogsController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const { getAdminLogs, createAdminLog, getAdminLogById, deleteAdminLog } = require('../controllers/adminLogsController');
+const { verifyToken, isAdmin } = require('../middlewares/authMiddleware');
 
-router.get('/', authMiddleware, adminLogsController.getAllLogs);
-router.post('/', authMiddleware, adminLogsController.createLog);
+// Rutas protegidas para manejar logs administrativos
+router.get('/', verifyToken, isAdmin, getAdminLogs);         
+router.post('/', verifyToken, isAdmin, createAdminLog);      
+router.get('/:id', verifyToken, isAdmin, getAdminLogById);   
+router.delete('/:id', verifyToken, isAdmin, deleteAdminLog);
 
 module.exports = router;

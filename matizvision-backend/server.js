@@ -7,7 +7,7 @@ const app = express();
 
 // ✅ Configuración avanzada de CORS
 app.use(cors());
-app.options('*', (req, res) => res.sendStatus(200)); // Permite OPTIONS globalmente
+app.options('*', (req, res) => res.sendStatus(200));
 
 // ✅ Middleware para analizar JSON
 app.use(express.json());
@@ -24,6 +24,7 @@ app.use('/api/citas', require('./routes/citaRoutes'));
 app.use('/api/compras', require('./routes/compraRoutes'));
 app.use('/api/adminlogs', require('./routes/adminLogsRoutes'));
 app.use('/api/testimonios', require('./routes/testimonioRoutes'));
+app.use('/api/panelsettings', require('./routes/panelsettingsRoutes'));
 
 // ✅ Conectar Base de Datos
 sequelize.sync().then(() => console.log('Base de datos sincronizada'));

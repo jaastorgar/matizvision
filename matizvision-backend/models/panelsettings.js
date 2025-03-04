@@ -1,35 +1,28 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-class Compra extends Model {}
+class PanelSettings extends Model {}
 
-Compra.init({
+PanelSettings.init({
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    usuarioId: {
-        type: DataTypes.INTEGER,
+    setting_key: {
+        type: DataTypes.STRING,
         allowNull: false,
-        references: {
-            model: 'Usuarios',
-            key: 'id'
-        }
+        unique: true
     },
-    total: {
-        type: DataTypes.FLOAT,
-        allowNull: false
-    },
-    estado: {
+    setting_value: {
         type: DataTypes.STRING,
         allowNull: false
     }
 }, {
     sequelize,
-    modelName: 'Compra',
-    tableName: 'Compras',
+    modelName: 'PanelSettings',
+    tableName: 'panelsettings',
     timestamps: false
 });
 
-module.exports = Compra;
+module.exports = PanelSettings;

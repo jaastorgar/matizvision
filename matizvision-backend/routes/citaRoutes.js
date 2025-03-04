@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const citaController = require('../controllers/citaController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const { verifyToken } = require('../middlewares/authMiddleware'); // ✅ Usamos la función correcta
 
-router.get('/:usuarioId', authMiddleware, citaController.obtenerCitasPorUsuario);
-router.post('/', citaController.createCita);
-router.put('/:id', authMiddleware, citaController.updateCita);
-router.delete('/:id', authMiddleware, citaController.deleteCita);
+// Rutas protegidas para citas
+router.get('/:usuarioId', verifyToken, citaController.obtenerCitasPorUsuario);
+router.post('/', verifyToken, citaController.createCita);
+router.put('/:id', verifyToken, citaController.updateCita);
+router.delete('/:id', verifyToken, citaController.deleteCita);
 
 module.exports = router;
