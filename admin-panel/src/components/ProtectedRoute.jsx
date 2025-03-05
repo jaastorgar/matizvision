@@ -1,15 +1,41 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
+import api from '../api/api'; // ✅ Usamos la API centralizada
 
-const ProtectedRoute = ({ children, requiredRole }) => {
-    const { user } = useAuth();
+const ProtectedRoute = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                console.warn("⚠ No hay token, redirigiendo a /login");
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const res = await api.get('/auth/profile', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                console.log("✅ Usuario autenticado en ProtectedRoute:", res.data);
+                setUser(res.data);
+            } catch (error) {
+                console.error("❌ Error al verificar autenticación:", error);
+                setUser(null);
+            }
+            setLoading(false);
+        };
+
+        checkAuth();
+    }, []);
+
+    if (loading) return <p>Cargando...</p>;
 
     if (!user) {
-        return <Navigate to="/login" />;
-    }
-
-    if (requiredRole && user.rol !== requiredRole && user.rol !== 'admin') {
-        return <Navigate to="/unauthorized" />;
+        return <Navigate to="/login" replace />;
     }
 
     return children;

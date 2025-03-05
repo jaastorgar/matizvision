@@ -5,7 +5,7 @@ const AdminLogs = () => {
     const [logs, setLogs] = useState([]);
 
     useEffect(() => {
-        axios.get('http://localhost:3000/api/adminlogs', {
+        axios.get('http://localhost:5000/api/adminlogs', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         .then(response => setLogs(response.data))

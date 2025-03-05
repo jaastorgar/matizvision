@@ -6,7 +6,7 @@ const PanelSettings = () => {
     const [newSetting, setNewSetting] = useState({ key: '', value: '' });
 
     useEffect(() => {
-        axios.get('http://localhost:3000/api/panelsettings', {
+        axios.get('http://localhost:5000/api/panelsettings', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         .then(response => setSettings(response.data))
@@ -14,7 +14,7 @@ const PanelSettings = () => {
     }, []);
 
     const handleCreateSetting = () => {
-        axios.post('http://localhost:3000/api/panelsettings', newSetting, {
+        axios.post('http://localhost:5000/api/panelsettings', newSetting, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         .then(response => setSettings([...settings, response.data]))
