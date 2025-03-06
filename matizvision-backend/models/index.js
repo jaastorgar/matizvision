@@ -27,6 +27,9 @@ Cita.belongsTo(Usuario, { foreignKey: 'usuarioId' });
 Usuario.hasMany(Testimonio, { foreignKey: 'usuarioId' });
 Testimonio.belongsTo(Usuario, { foreignKey: 'usuarioId' });
 
+Usuario.hasMany(AdminLogs, { foreignKey: 'adminId' });
+AdminLogs.belongsTo(Usuario, { foreignKey: 'adminId' });
+
 // Exportar modelos
 module.exports = {
     sequelize,

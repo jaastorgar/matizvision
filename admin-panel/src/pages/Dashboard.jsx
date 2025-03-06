@@ -47,22 +47,39 @@ const Dashboard = () => {
     ];
 
     return (
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>Dashboard</h2>
+        <div style={{
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: '105%', 
+            height: '90vh', 
+            padding: '20px'
+        }}>
+            <h2 style={{ marginBottom: '20px' }}>Metrica Clave</h2>
             {loading ? (
                 <p>🔄 Cargando datos...</p>
             ) : error ? (
                 <p style={{ color: 'red' }}>⚠️ {error}</p>
             ) : (
-                <ResponsiveContainer width="95%" height={400}>
-                    <BarChart data={data} barSize={80}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" tick={{ fontSize: 14 }} angle={-20} dy={10} interval={0} />
-                        <YAxis allowDecimals={false} />
-                        <Tooltip />
-                        <Bar dataKey="value" fill="#8884d8" />
-                    </BarChart>
-                </ResponsiveContainer>
+                <div style={{
+                    width: '80%',
+                    height: '400px',
+                    backgroundColor: '#1a1a2e',
+                    padding: '30px',
+                    borderRadius: '30px',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
+                }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data} barSize={60}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" tick={{ fontSize: 14 }} angle={0} dy={10} interval={0} />
+                            <YAxis allowDecimals={false} />
+                            <Tooltip />
+                            <Bar dataKey="value" fill="#8884d8" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             )}
         </div>
     );

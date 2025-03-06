@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Usuario = require('./usuario'); // Importamos el modelo de Usuario para la relación
+const Usuario = require('./usuario');
 
 class AdminLogs extends Model {}
 
@@ -14,7 +14,7 @@ AdminLogs.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: Usuario, // Relación con la tabla de Usuarios
+            model: 'Usuarios',
             key: 'id'
         }
     },

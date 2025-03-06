@@ -59,7 +59,7 @@ exports.login = async (req, res) => {
         }
 
         console.log("🔑 Generando token de autenticación...");
-        const token = jwt.sign({ id: user.id, rol: user.rol }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user.id, rol: user.rol }, process.env.JWT_SECRET, { expiresIn: '10h' });
 
         console.log("✅ Inicio de sesión exitoso para:", email);
         res.json({
