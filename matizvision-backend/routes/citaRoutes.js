@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const citaController = require('../controllers/citaController');
-const { verifyToken } = require('../middlewares/authMiddleware'); // ✅ Usamos la función correcta
+const { verifyToken } = require('../middlewares/authMiddleware'); // ✅ Función correcta
 
-// Rutas protegidas para citas
+// Rutas protegidas para citas de usuarios autenticados
 router.get('/:usuarioId', verifyToken, citaController.obtenerCitasPorUsuario);
-router.post('/', verifyToken, citaController.createCita);
 router.put('/:id', verifyToken, citaController.updateCita);
 router.delete('/:id', verifyToken, citaController.deleteCita);
+
+// 📌 Permitir a usuarios no autenticados solicitar citas
+router.post('/', citaController.createCita);
 
 module.exports = router;

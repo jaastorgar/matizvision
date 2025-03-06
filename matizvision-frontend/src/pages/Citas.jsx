@@ -9,7 +9,7 @@ function Citas() {
   const [email, setEmail] = useState('');
   const [telefono, setTelefono] = useState('');
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [mensaje, setMensaje] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -20,39 +20,40 @@ function Citas() {
         console.error("❌ Error al parsear el usuario:", error);
       }
     }
-    setIsLoading(false);
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token"); // ✅ Obtener el token de autenticación
-      if (!token) {
-        alert("❌ Debes iniciar sesión para agendar una cita.");
-        return;
-      }
+      const token = localStorage.getItem("token"); // Obtener el token si existe
 
-      const headers = { Authorization: `Bearer ${token}` }; // ✅ Agregar el token en la solicitud
-
+      // Construir los datos de la cita
       const citaData = user 
-        ? { fecha, hora, userId: user.id } 
+        ? { fecha, hora, usuarioId: user.id } 
         : { fecha, hora, email, telefono };
+
+      const headers = {}; // Inicializar headers vacío
+
+      if (user && token) {
+        headers.Authorization = `Bearer ${token}`; // Solo añadir el token si el usuario está autenticado
+      }
 
       const response = await api.post('/citas', citaData, { headers });
 
-      alert(response.data.msg || '✅ Cita solicitada con éxito');
+      setMensaje({ tipo: "éxito", texto: response.data.msg || "✅ Cita solicitada con éxito" });
+
+      setTimeout(() => {
+        window.location.href = "/"; // 🔄 Redirige a la página de inicio después de 3 segundos
+      }, 3000);
+
       setFecha('');
       setHora('');
       setEmail('');
       setTelefono('');
     } catch (error) {
-      alert('❌ Error al solicitar la cita: ' + (error.response?.data?.msg || error.message));
+      setMensaje({ tipo: "error", texto: '❌ Error al solicitar la cita: ' + (error.response?.data?.msg || error.message) });
     }
   };
-
-  if (isLoading) {
-    return <div>Cargando...</div>;
-  }
 
   return (
     <>
@@ -60,6 +61,7 @@ function Citas() {
       <div style={containerStyle}>
         <div style={formStyle}>
           <h2 style={titleStyle}>📅 Solicitar Cita</h2>
+          {mensaje && <p style={{ color: mensaje.tipo === "error" ? "red" : "green", textAlign: "center" }}>{mensaje.texto}</p>}
           <form onSubmit={handleSubmit} style={formContainerStyle}>
             <label style={labelStyle}>Fecha:</label>
             <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required style={inputStyle} />
@@ -86,6 +88,7 @@ function Citas() {
   );
 }
 
+// Estilos
 const containerStyle = {
   padding: '40px',
   backgroundColor: '#f0f0f0',
