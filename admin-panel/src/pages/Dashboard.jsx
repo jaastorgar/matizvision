@@ -4,10 +4,15 @@ import api from '../api/api';
 
 const Dashboard = () => {
     const [metrics, setMetrics] = useState({
-        usuarios: 0,
+        clientes: 0,
+        administradores: 0,
+        trabajadores: 0,
         citasPendientes: 0,
-        productosVendidos: 0
+        citasConfirmadas: 0,
+        citasRechazadas: 0,
+        citasReprogramadas: 0
     });
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -22,9 +27,13 @@ const Dashboard = () => {
                     setError("No hay datos disponibles.");
                 } else {
                     setMetrics({
-                        usuarios: Number.isFinite(response.data.usuarios) ? Math.round(response.data.usuarios) : 0,
-                        citasPendientes: Number.isFinite(response.data.citasPendientes) ? Math.round(response.data.citasPendientes) : 0,
-                        productosVendidos: Number.isFinite(response.data.productosVendidos) ? Math.round(response.data.productosVendidos) : 0
+                        clientes: response.data.clientes || 0,
+                        administradores: response.data.administradores || 0,
+                        trabajadores: response.data.trabajadores || 0,
+                        citasPendientes: response.data.citasPendientes || 0,
+                        citasConfirmadas: response.data.citasConfirmadas || 0,
+                        citasRechazadas: response.data.citasRechazadas || 0,
+                        citasReprogramadas: response.data.citasReprogramadas || 0
                     });
                 }
             } catch (error) {
@@ -40,45 +49,83 @@ const Dashboard = () => {
 
     console.log("📊 Datos para la gráfica:", metrics);
 
-    const data = [
-        { name: 'Usuarios', value: metrics.usuarios },
-        { name: 'Citas Pendientes', value: metrics.citasPendientes },
-        { name: 'Productos Vendidos', value: metrics.productosVendidos }
+    const dataUsuarios = [
+        { name: 'Clientes', value: metrics.clientes },
+        { name: 'Administradores', value: metrics.administradores },
+        { name: 'Trabajadores', value: metrics.trabajadores }
+    ];
+
+    const dataCitas = [
+        { name: 'Pendientes', value: metrics.citasPendientes },
+        { name: 'Confirmadas', value: metrics.citasConfirmadas },
+        { name: 'Rechazadas', value: metrics.citasRechazadas },
+        { name: 'Reprogramadas', value: metrics.citasReprogramadas }
     ];
 
     return (
         <div style={{
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: '105%', 
-            height: '90vh', 
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: '90vh',
             padding: '20px'
         }}>
-            <h2 style={{ marginBottom: '20px' }}>Metrica Clave</h2>
+            <h2 style={{ marginBottom: '20px' }}>📊 Métricas Clave</h2>
             {loading ? (
                 <p>🔄 Cargando datos...</p>
             ) : error ? (
                 <p style={{ color: 'red' }}>⚠️ {error}</p>
             ) : (
                 <div style={{
-                    width: '80%',
-                    height: '400px',
-                    backgroundColor: '#1a1a2e',
-                    padding: '30px',
-                    borderRadius: '30px',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '20px',
+                    justifyContent: 'center',
+                    width: '100%'
                 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data} barSize={60}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" tick={{ fontSize: 14 }} angle={0} dy={10} interval={0} />
-                            <YAxis allowDecimals={false} />
-                            <Tooltip />
-                            <Bar dataKey="value" fill="#8884d8" />
-                        </BarChart>
-                    </ResponsiveContainer>
+                    {/* Gráfico de Usuarios */}
+                    <div style={{
+                        flex: 1,
+                        height: '300px',
+                        backgroundColor: '#1a1a2e',
+                        padding: '60px',
+                        borderRadius: '30px',
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
+                    }}>
+                        <h3 style={{ color: 'white', textAlign: 'center' }}>👤 Usuarios</h3>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={dataUsuarios} barSize={60}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" tick={{ fontSize: 14 }} interval={0} />
+                                <YAxis allowDecimals={false} />
+                                <Tooltip />
+                                <Bar dataKey="value" fill="#8884d8" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+
+                    {/* Gráfico de Citas */}
+                    <div style={{
+                        flex: 1,
+                        height: '300px',
+                        backgroundColor: '#1a1a2e',
+                        padding: '60px',
+                        borderRadius: '30px',
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
+                    }}>
+                        <h3 style={{ color: 'white', textAlign: 'center' }}>📅 Citas</h3>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={dataCitas} barSize={60}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" tick={{ fontSize: 14 }} interval={0} />
+                                <YAxis allowDecimals={false} />
+                                <Tooltip />
+                                <Bar dataKey="value" fill="#82ca9d" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
             )}
         </div>

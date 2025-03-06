@@ -4,24 +4,39 @@ exports.getDashboardMetrics = async (req, res) => {
     try {
         console.log("📡 Obteniendo métricas del Dashboard...");
 
-        // Obtener número total de usuarios
-        const totalUsuarios = await Usuario.count();
+        // 👤 Usuarios desglosados
+        const totalClientes = await Usuario.count({ where: { rol: 'cliente' } });
+        const totalAdministradores = await Usuario.count({ where: { rol: 'admin' } });
+        const totalTrabajadores = await Usuario.count({ where: { rol: 'trabajador' } });
 
-        // Obtener número total de citas pendientes
-        const totalCitasPendientes = await Cita.count({ where: { estado: 'pendiente' } });
+        // 📅 Citas desglosadas
+        const citasPendientes = await Cita.count({ where: { estado: 'pendiente' } });
+        const citasConfirmadas = await Cita.count({ where: { estado: 'confirmada' } });
+        const citasRechazadas = await Cita.count({ where: { estado: 'rechazada' } });
+        const citasReprogramadas = await Cita.count({ where: { estado: 'reprogramada' } });
 
-        // Obtener número total de productos vendidos
+        // 📦 Productos vendidos
         const totalProductosVendidos = await DetalleCompra.sum('cantidad') || 0;
 
         console.log("📊 Datos obtenidos:", {
-            usuarios: totalUsuarios,
-            citasPendientes: totalCitasPendientes,
+            clientes: totalClientes,
+            administradores: totalAdministradores,
+            trabajadores: totalTrabajadores,
+            citasPendientes,
+            citasConfirmadas,
+            citasRechazadas,
+            citasReprogramadas,
             productosVendidos: totalProductosVendidos
         });
 
         res.json({
-            usuarios: totalUsuarios,
-            citasPendientes: totalCitasPendientes,
+            clientes: totalClientes,
+            administradores: totalAdministradores,
+            trabajadores: totalTrabajadores,
+            citasPendientes,
+            citasConfirmadas,
+            citasRechazadas,
+            citasReprogramadas,
             productosVendidos: totalProductosVendidos
         });
     } catch (error) {
