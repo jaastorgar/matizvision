@@ -11,22 +11,24 @@ exports.getAllCitas = async (req, res) => {
 
 exports.createCita = async (req, res) => {
   try {
-      const { fecha, hora, userId, email, telefono } = req.body;
+      const { fecha, hora, usuarioId, email, telefono } = req.body;
 
       if (!fecha || !hora) {
           return res.status(400).json({ msg: "❌ La fecha y la hora son obligatorias." });
       }
 
-      if (!userId && (!email || !telefono)) {
-          return res.status(400).json({ msg: "❌ El correo y teléfono son obligatorios para usuarios no registrados." });
+      if (!usuarioId) { 
+        if (!email || !telefono) {
+            return res.status(400).json({ msg: "❌ El correo y teléfono son obligatorios para usuarios no registrados." });
+        }
       }
-
+    
       const nuevaCita = await Cita.create({
-          usuarioId: userId || null,
+          usuarioId: usuarioId ? usuarioId : null,
           fecha,
           hora,
-          email: userId ? null : email,
-          telefono: userId ? null : telefono,
+          email: usuarioId ? null : email,  // Solo usuarios no autenticados necesitan email
+          telefono: usuarioId ? null : telefono, // Solo usuarios no autenticados necesitan teléfono
           estado: 'pendiente'
       });
 
