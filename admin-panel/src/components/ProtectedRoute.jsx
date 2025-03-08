@@ -21,7 +21,14 @@ const ProtectedRoute = ({ children }) => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 console.log("✅ Usuario autenticado en ProtectedRoute:", res.data);
-                setUser(res.data);
+
+                // 🔹 Solo permitir acceso si el usuario es admin o trabajador
+                if (res.data.rol === "admin" || res.data.rol === "trabajador") {
+                    setUser(res.data);
+                } else {
+                    console.warn("⛔ Usuario sin permisos, redirigiendo a /login");
+                    setUser(null);
+                }
             } catch (error) {
                 console.error("❌ Error al verificar autenticación:", error);
                 setUser(null);

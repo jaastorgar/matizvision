@@ -1,14 +1,5 @@
 const { Cita } = require('../models');
 
-exports.getAllCitas = async (req, res) => {
-  try {
-    const citas = await Cita.findAll();
-    res.json(citas);
-  } catch (error) {
-    res.status(500).json({ msg: "Error al obtener citas" });
-  }
-};
-
 exports.createCita = async (req, res) => {
   try {
       const { fecha, hora, usuarioId, email, telefono } = req.body;
@@ -22,13 +13,16 @@ exports.createCita = async (req, res) => {
             return res.status(400).json({ msg: "❌ El correo y teléfono son obligatorios para usuarios no registrados." });
         }
       }
-    
+
+      // Combinar fecha y hora correctamente antes de guardarla
+      const fechaHora = new Date(`${fecha}T${hora}:00`);
+      console.log("📅 Fecha y Hora guardada en la BD:", fechaHora);
+
       const nuevaCita = await Cita.create({
           usuarioId: usuarioId ? usuarioId : null,
-          fecha,
-          hora,
-          email: usuarioId ? null : email,  // Solo usuarios no autenticados necesitan email
-          telefono: usuarioId ? null : telefono, // Solo usuarios no autenticados necesitan teléfono
+          fecha: fechaHora, // Guardamos la fecha y la hora correctamente
+          email: usuarioId ? null : email,  
+          telefono: usuarioId ? null : telefono, 
           estado: 'pendiente'
       });
 
@@ -40,49 +34,14 @@ exports.createCita = async (req, res) => {
   }
 };
 
-exports.updateCita = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { fecha, hora } = req.body;
-    const cita = await Cita.findByPk(id);
-
-    if (!cita) {
-      return res.status(404).json({ msg: "❌ Cita no encontrada" });
-    }
-
-    await cita.update({ fecha, hora });
-    res.json({ msg: "✅ Cita actualizada con éxito", cita });
-  } catch (error) {
-    res.status(500).json({ msg: "❌ Error al actualizar la cita" });
-  }
-};
-
-exports.deleteCita = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const cita = await Cita.findByPk(id);
-
-    if (!cita) {
-      return res.status(404).json({ msg: "❌ Cita no encontrada" });
-    }
-
-    await cita.destroy();
-    res.json({ msg: "✅ Cita eliminada correctamente" });
-  } catch (error) {
-    res.status(500).json({ msg: "❌ Error al eliminar la cita" });
-  }
-};
-
 exports.obtenerCitasPorUsuario = async (req, res) => {
   try {
       const { usuarioId } = req.params;
 
-      // Verificar que el usuarioId es un número válido
       if (!usuarioId) {
           return res.status(400).json({ msg: "❌ Usuario ID es obligatorio" });
       }
 
-      // Buscar citas en la base de datos
       const citas = await Cita.findAll({ where: { usuarioId } });
 
       if (!citas.length) {

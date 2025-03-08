@@ -25,14 +25,12 @@ function Citas() {
     }
   }, []);
 
-  // Simular fechas disponibles (Esto podría venir de una API en un futuro)
   useEffect(() => {
     if (examenSeleccionado) {
       setFechasDisponibles(["2025-03-10", "2025-03-12", "2025-03-14"]);
     }
   }, [examenSeleccionado]);
 
-  // Simular horas disponibles (Esto podría venir de una API en un futuro)
   useEffect(() => {
     if (fecha) {
       setHorasDisponibles(["10:00", "12:00", "14:00", "16:00"]);
@@ -41,39 +39,47 @@ function Citas() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!fecha || !hora) {
+      setMensaje({ tipo: "error", texto: "❌ La fecha y la hora son obligatorias." });
+      return;
+    }
+
     try {
-        const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
-        // Construcción de la data de la cita
-        let citaData = { fecha, hora };
+      console.log("📅 Fecha seleccionada:", fecha);
+      console.log("⏰ Hora seleccionada:", hora);
 
-        if (user?.id) { // Solo agrega usuarioId si el usuario está autenticado
-            citaData.usuarioId = user.id;
-        } else {
-            citaData.email = email;
-            citaData.telefono = telefono;
-        }
+      let citaData = { fecha, hora };
 
-        const headers = {};
-        if (user && token) {
-            headers.Authorization = `Bearer ${token}`;
-        }
+      if (user?.id) {
+        citaData.usuarioId = user.id;
+      } else {
+        citaData.email = email;
+        citaData.telefono = telefono;
+      }
 
-        const response = await api.post('/citas', citaData, { headers });
+      const headers = {};
+      if (user && token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
 
-        setMensaje({ tipo: "éxito", texto: response.data.msg || "✅ Cita solicitada con éxito" });
+      const response = await api.post('/citas', citaData, { headers });
 
-        setTimeout(() => {
-            window.location.href = "/"; 
-        }, 3000);
+      setMensaje({ tipo: "éxito", texto: response.data.msg || "✅ Cita solicitada con éxito" });
 
-        setExamenSeleccionado('');
-        setFecha('');
-        setHora('');
-        setEmail('');
-        setTelefono('');
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 3000);
+
+      setExamenSeleccionado('');
+      setFecha('');
+      setHora('');
+      setEmail('');
+      setTelefono('');
     } catch (error) {
-        setMensaje({ tipo: "error", texto: '❌ Error al solicitar la cita: ' + (error.response?.data?.msg || error.message) });
+      console.error("❌ Error al solicitar la cita:", error);
+      setMensaje({ tipo: "error", texto: '❌ Error al solicitar la cita: ' + (error.response?.data?.msg || error.message) });
     }
   };
 
@@ -86,14 +92,12 @@ function Citas() {
           {mensaje && <p style={{ color: mensaje.tipo === "error" ? "red" : "green", textAlign: "center" }}>{mensaje.texto}</p>}
 
           <form onSubmit={handleSubmit} style={formContainerStyle}>
-            {/* Selección del tipo de examen */}
             <label style={labelStyle}>Selecciona un examen:</label>
             <select value={examenSeleccionado} onChange={(e) => setExamenSeleccionado(e.target.value)} required style={inputStyle}>
               <option value="">Selecciona una opción</option>
               <option value="Examen Visual">👀 Examen Visual</option>
             </select>
 
-            {/* Selección de fecha disponible */}
             {examenSeleccionado && (
               <>
                 <label style={labelStyle}>Fecha disponible:</label>
@@ -106,7 +110,6 @@ function Citas() {
               </>
             )}
 
-            {/* Selección de hora disponible */}
             {fecha && (
               <>
                 <label style={labelStyle}>Hora disponible:</label>
@@ -119,17 +122,6 @@ function Citas() {
               </>
             )}
 
-            {/* Campos adicionales solo para usuarios no autenticados */}
-            {!user && fecha && hora && (
-              <>
-                <label style={labelStyle}>Correo:</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={inputStyle} />
-
-                <label style={labelStyle}>Teléfono:</label>
-                <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)} required style={inputStyle} />
-              </>
-            )}
-
             <button type="submit" style={buttonStyle}>📌 Solicitar Cita</button>
           </form>
         </div>
@@ -139,7 +131,7 @@ function Citas() {
   );
 }
 
-// Estilos
+// **Estilos**
 const containerStyle = {
   padding: '40px',
   backgroundColor: '#f0f0f0',

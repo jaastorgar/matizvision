@@ -1,11 +1,21 @@
-const Producto = require('../models/Producto');
+const Producto = require('../models/producto');
 
 exports.getAllProducts = async (req, res, next) => {
     try {
+        console.log("📡 Obteniendo productos desde la base de datos...");
         const productos = await Producto.findAll();
+
+        console.log("📦 Productos encontrados:", productos);
+
+        if (!Array.isArray(productos)) {
+            console.error("❌ Error: La base de datos no devolvió un array.");
+            return res.status(500).json({ error: "La API no devolvió un array válido." });
+        }
+
         res.json(productos);
     } catch (error) {
-        next(error);
+        console.error("❌ Error al obtener productos:", error);
+        res.status(500).json({ error: "No se pudieron obtener los productos." });
     }
 };
 

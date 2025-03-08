@@ -26,6 +26,9 @@ app.use('/api/adminlogs', require('./routes/adminLogsRoutes'));
 app.use('/api/testimonios', require('./routes/testimonioRoutes'));
 app.use('/api/panelsettings', require('./routes/panelsettingsRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+app.use('/api/usuarios', require('./safetyroute/userRoutes'));
+app.use('/api/admincitas', require('./safetyroute/adminCitaRoutes'));
+app.use('/api/adminproducts', require('./safetyroute/adminProductoRoutes'));
 
 // ✅ Conectar Base de Datos
 sequelize.sync().then(() => console.log('Base de datos sincronizada'));

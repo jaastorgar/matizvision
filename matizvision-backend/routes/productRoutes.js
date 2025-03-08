@@ -6,6 +6,12 @@ const { verifyToken, isAdmin } = require('../middlewares/authMiddleware'); // �
 // Manejar preflight de CORS
 router.options('*', (req, res) => res.sendStatus(200));
 
+// ✅ Agregar logs para verificar que las rutas funcionan
+router.use((req, res, next) => {
+    console.log(`🔍 Recibida petición: ${req.method} ${req.originalUrl}`);
+    next();
+});
+
 // Rutas públicas
 router.get('/', productController.getAllProducts);
 router.get('/:id', productController.getProductById);
