@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { sequelize } = require('./models');
 
 const app = express();
@@ -11,6 +12,9 @@ app.options('*', (req, res) => res.sendStatus(200));
 
 // ✅ Middleware para analizar JSON
 app.use(express.json());
+
+// ✅ Servir archivos estáticos (para imágenes)
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ✅ Ruta de prueba
 app.get('/', (req, res) => {

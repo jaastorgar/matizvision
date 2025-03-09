@@ -1,6 +1,6 @@
 const { Producto } = require("../models");
 
-// 📌 Obtener todos los productos (Solo Admin)
+// 📌 Obtener todos los productos
 exports.obtenerProductosAdmin = async (req, res) => {
   try {
     const productos = await Producto.findAll();
@@ -11,15 +11,11 @@ exports.obtenerProductosAdmin = async (req, res) => {
   }
 };
 
-// 📌 Crear un nuevo producto (Solo Admin)
+// 📌 Crear un nuevo producto con imagen
 exports.crearProductoAdmin = async (req, res) => {
   try {
-    const { nombre, descripcion, precio, stock, imagen } = req.body;
-
-    // Validar datos
-    if (!nombre || !descripcion || !precio || !stock) {
-      return res.status(400).json({ message: "Todos los campos son obligatorios" });
-    }
+    const { nombre, descripcion, precio, stock } = req.body;
+    const imagen = req.file ? `/uploads/${req.file.filename}` : null; // Guardar la ruta
 
     const nuevoProducto = await Producto.create({ nombre, descripcion, precio, stock, imagen });
     res.status(201).json(nuevoProducto);
@@ -29,18 +25,19 @@ exports.crearProductoAdmin = async (req, res) => {
   }
 };
 
-// 📌 Actualizar un producto (Solo Admin)
+// 📌 Actualizar un producto (incluye imagen opcional)
 exports.actualizarProductoAdmin = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, descripcion, precio, stock, imagen } = req.body;
+    const { nombre, descripcion, precio, stock } = req.body;
+    const imagen = req.file ? `/uploads/${req.file.filename}` : null;
 
     const producto = await Producto.findByPk(id);
     if (!producto) {
       return res.status(404).json({ message: "Producto no encontrado" });
     }
 
-    await producto.update({ nombre, descripcion, precio, stock, imagen });
+    await producto.update({ nombre, descripcion, precio, stock, imagen: imagen || producto.imagen });
     res.json({ message: "Producto actualizado correctamente", producto });
   } catch (error) {
     console.error("❌ Error al actualizar el producto:", error);
@@ -48,12 +45,12 @@ exports.actualizarProductoAdmin = async (req, res) => {
   }
 };
 
-// 📌 Eliminar un producto (Solo Admin)
+// 📌 Eliminar un producto
 exports.eliminarProductoAdmin = async (req, res) => {
   try {
     const { id } = req.params;
-
     const producto = await Producto.findByPk(id);
+
     if (!producto) {
       return res.status(404).json({ message: "Producto no encontrado" });
     }

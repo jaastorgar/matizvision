@@ -1,152 +1,251 @@
 import React, { useState, useEffect } from "react";
+import styled from "styled-components";
 import api from "../api/api";
 
+// Estilos del contenedor principal
+const Container = styled.div`
+  padding: 20px;
+  color: white;
+  min-height: 90vh;
+  width: 345%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: #0a0a1f;
+`;
+
+const Title = styled.h2`
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #00ffff;
+`;
+
+const SearchContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 1200px;
+  margin-bottom: 20px;
+`;
+
+const SearchInput = styled.input`
+  flex: 1;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  margin-right: 10px;
+  color: black;
+`;
+
+const Button = styled.button`
+  background-color: ${(props) => (props.$danger ? "#ff0000" : "#00ffff")};
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+  margin: 5px;
+
+  &:hover {
+    background-color: ${(props) => (props.$danger ? "#cc0000" : "#009999")};
+  }
+`;
+
+const TableContainer = styled.div`
+  width: 90%;
+  max-width: 1200px;
+  background: #121212;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  overflow-x: auto;
+`;
+
+const StyledTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+`;
+
+const TableHeader = styled.thead`
+  background-color: #00ffff;
+  color: black;
+  font-weight: bold;
+`;
+
+const TableRow = styled.tr`
+  border-bottom: 1px solid #444;
+  &:hover {
+    background-color: #222;
+  }
+`;
+
+const TableCell = styled.td`
+  padding: 12px;
+  border-bottom: 1px solid #444;
+`;
+
+const ProductImage = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  object-fit: cover;
+`;
+
+const ModalOverlay = styled.div`
+  display: ${(props) => (props.$show ? "flex" : "none")};
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+`;
+
+const ModalContent = styled.div`
+  background: #222;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 400px;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: none;
+`;
+
+const Message = styled.p`
+  color: ${(props) => (props.$error ? "red" : "green")};
+  font-weight: bold;
+  margin-top: 10px;
+`;
+
 const GestionProductos = () => {
-    const [productos, setProductos] = useState([]);
-    const [busqueda, setBusqueda] = useState("");
-    const [paginaActual, setPaginaActual] = useState(1);
-    const productosPorPagina = 5;
-    const [modalAbierto, setModalAbierto] = useState(false);
-    const [productoActual, setProductoActual] = useState(null);
-    const [mensaje, setMensaje] = useState("");
+  const [productos, setProductos] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [newProduct, setNewProduct] = useState({
+    nombre: "",
+    descripcion: "",
+    precio: "",
+    stock: "",
+    categoria: "",
+    imagen: null,
+  });
 
-    useEffect(() => {
-        fetchProductos();
-    }, []);
+  useEffect(() => {
+    fetchProductos();
+  }, []);
 
-    const fetchProductos = async () => {
-        try {
-            const response = await api.get("/productos");
-            setProductos(response.data);
-        } catch (error) {
-            console.error("❌ Error al obtener productos:", error);
-        }
-    };
+  const fetchProductos = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No autorizado");
+      const response = await api.get("/adminproducts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProductos(response.data);
+    } catch (error) {
+      console.error("Error al obtener productos:", error);
+    }
+  };
 
-    const handleBuscar = (e) => {
-        setBusqueda(e.target.value);
-    };
+  const handleBuscar = (e) => {
+    setBusqueda(e.target.value);
+  };
 
-    const productosFiltrados = productos.filter(producto =>
-        producto.nombre.toLowerCase().includes(busqueda.toLowerCase())
-    );
+  const productosFiltrados = Array.isArray(productos)
+    ? productos.filter((producto) =>
+        producto.nombre
+          ? producto.nombre.toLowerCase().includes(busqueda.toLowerCase())
+          : false
+      )
+    : [];
 
-    const indiceUltimo = paginaActual * productosPorPagina;
-    const indicePrimero = indiceUltimo - productosPorPagina;
-    const productosActuales = productosFiltrados.slice(indicePrimero, indiceUltimo);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewProduct({ ...newProduct, [name]: value });
+  };
 
-    const cambiarPagina = (numero) => setPaginaActual(numero);
+  const handleFileChange = (e) => {
+    setNewProduct({ ...newProduct, imagen: e.target.files[0] });
+  };
 
-    const abrirModal = (producto = null) => {
-        setProductoActual(producto);
-        setModalAbierto(true);
-    };
+  const handleAgregarProducto = async () => {
+    if (!newProduct.nombre || !newProduct.descripcion || !newProduct.precio || !newProduct.stock || !newProduct.categoria || !newProduct.imagen) {
+      setMessage({ text: "Todos los campos son obligatorios.", $error: true });
+      return;
+    }
 
-    const cerrarModal = () => {
-        setProductoActual(null);
-        setModalAbierto(false);
-    };
+    const formData = new FormData();
+    formData.append("nombre", newProduct.nombre);
+    formData.append("descripcion", newProduct.descripcion);
+    formData.append("precio", newProduct.precio);
+    formData.append("stock", newProduct.stock);
+    formData.append("categoria", newProduct.categoria);
+    formData.append("imagen", newProduct.imagen);
 
-    const handleEliminar = async (id) => {
-        if (window.confirm("⚠️ ¿Seguro que deseas eliminar este producto?")) {
-            try {
-                await api.delete(`/productos/${id}`);
-                fetchProductos();
-                setMensaje("✅ Producto eliminado correctamente.");
-            } catch (error) {
-                console.error("❌ Error al eliminar producto:", error);
-                setMensaje("❌ Error al eliminar el producto.");
-            }
-        }
-    };
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No autorizado");
+      await api.post("/adminproducts", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setMessage({ text: "Producto agregado con éxito!", $error: false });
+      setModalOpen(false);
+      fetchProductos();
+    } catch (error) {
+      console.error("Error al agregar producto:", error);
+      setMessage({ text: "Error al agregar producto.", $error: true });
+    }
+  };
 
-    return (
-        <div className="container mx-auto p-8 w-full min-h-screen bg-gray-900 text-white flex flex-col items-center">
-            <h2 className="text-4xl font-bold mb-6 text-center text-white">📦 Gestión de Productos</h2>
+  return (
+    <Container>
+      <Title>📦 Gestión de Productos</Title>
 
-            {mensaje && (
-                <div className="text-center bg-green-500 text-white p-2 rounded-lg mb-4 w-3/4">
-                    {mensaje}
-                </div>
-            )}
+      <SearchContainer>
+        <SearchInput
+          type="text"
+          placeholder="🔍 Buscar producto..."
+          value={busqueda}
+          onChange={handleBuscar}
+        />
+        <Button onClick={() => setModalOpen(true)}>➕ Agregar Producto</Button>
+      </SearchContainer>
 
-            <div className="flex justify-between items-center mb-6 w-3/4">
-                <input
-                    type="text"
-                    placeholder="🔍 Buscar producto..."
-                    className="p-3 border rounded-lg w-2/3 text-black"
-                    value={busqueda}
-                    onChange={handleBuscar}
-                />
-                <button onClick={() => abrirModal()} className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg shadow-lg">
-                    ➕ Agregar Producto
-                </button>
-            </div>
-
-            <div className="overflow-auto bg-gray-800 shadow-lg rounded-lg p-6 w-3/4">
-                <table className="w-full bg-gray-700 text-white rounded-lg">
-                    <thead className="bg-gray-600 text-white sticky top-0">
-                        <tr>
-                            <th className="py-4 px-6">ID</th>
-                            <th className="py-4 px-6">Nombre</th>
-                            <th className="py-4 px-6">Descripción</th>
-                            <th className="py-4 px-6">Precio</th>
-                            <th className="py-4 px-6">Stock</th>
-                            <th className="py-4 px-6">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {productosActuales.map((producto) => (
-                            <tr key={producto.id} className="border-b hover:bg-gray-600 text-center">
-                                <td className="py-4 px-6">{producto.id}</td>
-                                <td className="py-4 px-6">{producto.nombre}</td>
-                                <td className="py-4 px-6">{producto.descripcion}</td>
-                                <td className="py-4 px-6">${producto.precio}</td>
-                                <td className="py-4 px-6">{producto.stock}</td>
-                                <td className="py-4 px-6 flex justify-center space-x-2">
-                                    <button onClick={() => abrirModal(producto)} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
-                                        ✏️ Editar
-                                    </button>
-                                    <button onClick={() => handleEliminar(producto.id)} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
-                                        🗑️ Eliminar
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="flex justify-center mt-6">
-                {Array.from({ length: Math.ceil(productosFiltrados.length / productosPorPagina) }, (_, i) => (
-                    <button
-                        key={i}
-                        onClick={() => cambiarPagina(i + 1)}
-                        className={`px-5 py-3 mx-2 text-lg font-bold ${paginaActual === i + 1 ? "bg-gray-700 text-white" : "bg-gray-500 text-gray-200"} rounded-lg shadow-lg`}
-                    >
-                        {i + 1}
-                    </button>
-                ))}
-            </div>
-
-            {modalAbierto && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-gray-800 p-6 rounded-lg w-1/3 shadow-2xl">
-                        <h2 className="text-2xl font-bold mb-4 text-white">{productoActual ? "Editar Producto" : "Agregar Producto"}</h2>
-                        <input type="text" placeholder="Nombre" className="w-full p-3 mb-3 border rounded-lg text-black" />
-                        <input type="text" placeholder="Descripción" className="w-full p-3 mb-3 border rounded-lg text-black" />
-                        <input type="number" placeholder="Precio" className="w-full p-3 mb-3 border rounded-lg text-black" />
-                        <input type="number" placeholder="Stock" className="w-full p-3 mb-3 border rounded-lg text-black" />
-                        <input type="file" className="w-full p-3 mb-3 border rounded-lg" accept="image/*" />
-                        <div className="flex justify-end">
-                            <button onClick={cerrarModal} className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg mr-2">Cancelar</button>
-                            <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">Guardar</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+      <ModalOverlay $show={modalOpen}>
+        <ModalContent>
+          <h2>Agregar Producto</h2>
+          <Input type="text" name="nombre" placeholder="Nombre" onChange={handleInputChange} />
+          <Input type="text" name="descripcion" placeholder="Descripción" onChange={handleInputChange} />
+          <Input type="number" name="precio" placeholder="Precio" onChange={handleInputChange} />
+          <Input type="number" name="stock" placeholder="Stock" onChange={handleInputChange} />
+          <Input type="text" name="categoria" placeholder="Categoría" onChange={handleInputChange} />
+          <Input type="file" onChange={handleFileChange} />
+          {message && <Message $error={message.$error}>{message.text}</Message>}
+          <Button onClick={handleAgregarProducto}>Guardar</Button>
+          <Button $danger onClick={() => setModalOpen(false)}>Cancelar</Button>
+        </ModalContent>
+      </ModalOverlay>
+    </Container>
+  );
 };
 
 export default GestionProductos;

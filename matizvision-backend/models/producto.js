@@ -8,7 +8,10 @@ Producto.init({
     descripcion: DataTypes.STRING,
     precio: DataTypes.FLOAT,
     stock: DataTypes.INTEGER,
-    imagen: DataTypes.STRING
+    imagen: {
+        type: DataTypes.STRING,
+        allowNull: true
+    }
 }, {
     sequelize,
     modelName: 'Producto',
