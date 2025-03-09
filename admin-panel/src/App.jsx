@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import GestionCitas from './pages/GestionCitas';
 import GestionProductos from './pages/GestionProductos';
 import GestionUsuarios from './pages/GestionUsuarios';
+import UsuarioDetalle from './pages/UsuarioDetalle';
 
 const Layout = () => {
     const location = useLocation();
@@ -25,6 +26,7 @@ const Layout = () => {
                 <Route path="/gestioncitas" element={<ProtectedRoute><GestionCitas /></ProtectedRoute>} />
                 <Route path="/gestionproductos" element={<ProtectedRoute><GestionProductos /></ProtectedRoute>} />
                 <Route path="/gestionusuarios" element={<ProtectedRoute><GestionUsuarios /></ProtectedRoute>} />
+                <Route path="/usuarios/:id" element={<ProtectedRoute><UsuarioDetalle /></ProtectedRoute>} />
             </Routes>
             {!isLoginPage && <Footer />} {/* ✅ Mostrar Footer si NO es login */}
         </>
