@@ -6,7 +6,9 @@ import api from "../api/axiosConfig";
 
 const Lentes = () => {
   const [productos, setProductos] = useState([]);
-  const [carrito, setCarrito] = useState([]);
+  const [carrito, setCarrito] = useState(() => {
+    return JSON.parse(localStorage.getItem("carrito")) || [];
+  });
 
   useEffect(() => {
     api.get("/products")
@@ -15,26 +17,32 @@ const Lentes = () => {
   }, []);
 
   const agregarAlCarrito = (producto) => {
-    setCarrito([...carrito, producto]);
+    const nuevoCarrito = [...carrito, producto];
+    setCarrito(nuevoCarrito);
+    localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
+  
+    const eventoCarrito = new CustomEvent("actualizarCarrito", {
+      detail: nuevoCarrito.length
+    });
+    window.dispatchEvent(eventoCarrito);
   };
 
   return (
     <div style={{ backgroundColor: "#F8F9FA", color: "#000000", fontFamily: "Arial, sans-serif" }}>
       <Navbar />
 
-      {/* Header */}
       <header style={headerStyle}>
         <h1 style={{ fontSize: "2.5em" }}>Nuestra Colección de Lentes</h1>
         <p>Explora nuestros modelos más exclusivos</p>
       </header>
 
-      {/* Sección de Productos Destacados */}
+      {/* Productos Destacados */}
       <section style={{ padding: "40px", textAlign: "center" }}>
         <h2 style={sectionTitle}>🔥 Productos Destacados</h2>
         <div style={carouselContainer}>
           {productos.slice(0, 5).map(producto => (
             <div key={producto.id} style={carouselItem}>
-              <img src={producto.imagen} alt={producto.nombre} style={imgStyle} />
+              <img src={`http://localhost:5000/uploads/${producto.imagen}`} alt={producto.nombre} style={imgStyle} />
               <h3>{producto.nombre}</h3>
               <p style={priceStyle}>${producto.precio}</p>
             </div>
@@ -42,21 +50,21 @@ const Lentes = () => {
         </div>
       </section>
 
-      {/* Lista de Productos */}
+      {/* Todos los productos */}
       <section style={{ padding: "40px", textAlign: "center" }}>
         <h2 style={sectionTitle}>🛍️ Todos los Productos</h2>
         <div style={gridContainer}>
           {productos.map(producto => (
             <div key={producto.id} style={cardStyle}>
               <div style={imgContainer}>
-                <img src={producto.imagen} alt={producto.nombre} style={imgStyle} />
+                <img src={`http://localhost:5000/uploads/${producto.imagen}`} alt={producto.nombre} style={imgStyle} />
                 {producto.nuevo && <span style={tagNuevo}>NUEVO</span>}
                 {producto.oferta && <span style={tagOferta}>OFERTA</span>}
               </div>
               <h3>{producto.nombre}</h3>
               <p style={priceStyle}>${producto.precio}</p>
               <div style={ratingContainer}>
-                {"⭐".repeat(producto.rating)} ({producto.reviews} reseñas)
+                {"⭐".repeat(producto.rating || 0)} ({producto.reviews || 0} reseñas)
               </div>
               <button onClick={() => agregarAlCarrito(producto)} style={buttonAgregar}>Añadir al Carrito</button>
               <Link to={`/producto/${producto.id}`} style={linkDetalle}>Ver Detalles</Link>
@@ -65,7 +73,7 @@ const Lentes = () => {
         </div>
       </section>
 
-      {/* Ir al Carrito */}
+      {/* Carrito */}
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <Link to="/carrito" style={linkStyle}>🛒 Ir al Carrito ({carrito.length})</Link>
       </div>
@@ -75,7 +83,7 @@ const Lentes = () => {
   );
 };
 
-// Estilos Mejorados
+// Estilos
 const headerStyle = {
   textAlign: "center",
   padding: "40px",

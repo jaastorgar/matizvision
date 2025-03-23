@@ -24,18 +24,27 @@ const Navbar = () => {
       }
     };
 
-    checkUser();
     const fetchCarrito = () => {
-      const carritoStorage = JSON.parse(localStorage.getItem("carrito")) || [];
-      setCarrito(carritoStorage);
+      try {
+        const carritoStorage = JSON.parse(localStorage.getItem("carrito")) || [];
+        setCarrito(carritoStorage);
+      } catch (err) {
+        console.error("❌ Error cargando carrito:", err);
+        setCarrito([]);
+      }
     };
+
+    checkUser();
     fetchCarrito();
 
     window.addEventListener("storage", checkUser);
+    window.addEventListener("carritoActualizado", fetchCarrito);
+
     return () => {
       window.removeEventListener("storage", checkUser);
+      window.removeEventListener("carritoActualizado", fetchCarrito);
     };
-  }, []);
+  }, [location]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -59,12 +68,12 @@ const Navbar = () => {
         <li><Link to="/carrito" style={linkStyle}>🛒 ({carrito.length})</Link></li>
 
         {user ? (
-          <li style={{ position: "relative" }}
-              onMouseEnter={() => setMenuOpen(true)}
-              onMouseLeave={() => setMenuOpen(false)}>
-            <button style={userButton}>
-              👤 {user.nombre}
-            </button>
+          <li
+            style={{ position: "relative" }}
+            onMouseEnter={() => setMenuOpen(true)}
+            onMouseLeave={() => setMenuOpen(false)}
+          >
+            <button style={userButton}>👤 {user.nombre}</button>
             {menuOpen && (
               <ul style={dropdownMenu}>
                 <li><Link to="/perfil" style={menuLink}>Perfil</Link></li>
@@ -83,7 +92,7 @@ const Navbar = () => {
   );
 };
 
-// ✅ **Estilos**
+// ✅ Estilos
 const navStyle = {
   backgroundColor: "#ffffff",
   color: "#0a0a1f",

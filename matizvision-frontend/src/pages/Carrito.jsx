@@ -8,10 +8,16 @@ const Carrito = () => {
 
   useEffect(() => {
     const carritoStorage = JSON.parse(localStorage.getItem("carrito")) || [];
-    setCarrito(carritoStorage);
+
+    // Asegura que cada producto tenga una cantidad mínima de 1
+    const carritoConCantidad = carritoStorage.map(producto => ({
+      ...producto,
+      cantidad: producto.cantidad || 1,
+    }));
+
+    setCarrito(carritoConCantidad);
   }, []);
 
-  // Aumentar cantidad de producto
   const aumentarCantidad = (index) => {
     const nuevoCarrito = [...carrito];
     nuevoCarrito[index].cantidad += 1;
@@ -19,7 +25,6 @@ const Carrito = () => {
     localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
   };
 
-  // Disminuir cantidad de producto
   const disminuirCantidad = (index) => {
     const nuevoCarrito = [...carrito];
     if (nuevoCarrito[index].cantidad > 1) {
@@ -31,54 +36,49 @@ const Carrito = () => {
     }
   };
 
-  // Eliminar producto del carrito
   const eliminarProducto = (index) => {
     const nuevoCarrito = carrito.filter((_, i) => i !== index);
     setCarrito(nuevoCarrito);
     localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
   };
 
-  // Calcular total de la compra
   const calcularTotal = () => {
-    return carrito.reduce((total, producto) => total + producto.precio * producto.cantidad, 0).toFixed(2);
+    return carrito.reduce((total, producto) => total + producto.precio * producto.cantidad, 0).toFixed(0);
   };
 
   return (
-    <div style={{ backgroundColor: "#D3D3D3", color: "#000000", fontFamily: "Arial, sans-serif" }}>
+    <div style={pageStyle}>
       <Navbar />
 
-      <header style={{ textAlign: "center", padding: "40px", backgroundColor: "#008000", color: "#ffffff" }}>
+      <header style={headerStyle}>
         <h1>🛒 Tu Carrito de Compras</h1>
       </header>
 
-      <section style={{ padding: "40px", textAlign: "center" }}>
+      <section style={sectionStyle}>
         {carrito.length > 0 ? (
           <div>
             {carrito.map((producto, index) => (
               <div key={index} style={cardStyle}>
-                <img src={producto.imagen} alt={producto.nombre} style={{ width: "100px", borderRadius: "8px" }} />
-                <h3 style={{ color: "#008000" }}>{producto.nombre}</h3>
-                <p style={{ fontSize: "1.2em", fontWeight: "bold", color: "#ff9900" }}>${producto.precio}</p>
-                
-                {/* Controles de cantidad */}
+                <img
+                  src={`http://localhost:5000/uploads/${producto.imagen}`}
+                  alt={producto.nombre}
+                  style={imageStyle}
+                />
+                <h3 style={titleStyle}>{producto.nombre}</h3>
+                <p style={priceStyle}>${producto.precio}</p>
+
                 <div>
                   <button onClick={() => disminuirCantidad(index)} style={cantidadBoton}>➖</button>
-                  <span style={{ margin: "0 10px", fontSize: "1.2em" }}>{producto.cantidad}</span>
+                  <span style={cantidadText}>{producto.cantidad}</span>
                   <button onClick={() => aumentarCantidad(index)} style={cantidadBoton}>➕</button>
                 </div>
 
-                <p style={{ fontSize: "1.2em", fontWeight: "bold", marginTop: "10px" }}>
-                  Total: ${(producto.precio * producto.cantidad).toFixed(2)}
-                </p>
-
+                <p style={totalPorProducto}>Total: ${(producto.precio * producto.cantidad).toFixed(0)}</p>
                 <button onClick={() => eliminarProducto(index)} style={buttonEliminar}>❌ Quitar</button>
               </div>
             ))}
 
-            {/* Total de la compra */}
             <h2 style={{ marginTop: "20px", color: "#008000" }}>Total: ${calcularTotal()}</h2>
-
-            {/* Botón de Pago */}
             <button style={buttonComprar}>💳 Proceder al Pago</button>
           </div>
         ) : (
@@ -86,7 +86,6 @@ const Carrito = () => {
         )}
       </section>
 
-      {/* Volver a la tienda */}
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <Link to="/lentes" style={linkStyle}>⬅️ Volver a la Tienda</Link>
       </div>
@@ -96,14 +95,48 @@ const Carrito = () => {
   );
 };
 
-// **Estilos Mejorados**
+// 🔧 Estilos
+const pageStyle = {
+  backgroundColor: "#D3D3D3",
+  color: "#000000",
+  fontFamily: "Arial, sans-serif",
+  minHeight: "100vh",
+};
+
+const headerStyle = {
+  textAlign: "center",
+  padding: "40px",
+  backgroundColor: "#008000",
+  color: "#ffffff",
+};
+
+const sectionStyle = {
+  padding: "40px",
+  textAlign: "center",
+};
+
 const cardStyle = {
   backgroundColor: "#ffffff",
   padding: "20px",
   borderRadius: "10px",
   textAlign: "center",
   marginBottom: "10px",
-  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)"
+  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+};
+
+const imageStyle = {
+  width: "100px",
+  borderRadius: "8px",
+};
+
+const titleStyle = {
+  color: "#008000",
+};
+
+const priceStyle = {
+  fontSize: "1.2em",
+  fontWeight: "bold",
+  color: "#ff9900",
 };
 
 const cantidadBoton = {
@@ -113,7 +146,18 @@ const cantidadBoton = {
   border: "none",
   borderRadius: "5px",
   cursor: "pointer",
-  margin: "5px"
+  margin: "5px",
+};
+
+const cantidadText = {
+  margin: "0 10px",
+  fontSize: "1.2em",
+};
+
+const totalPorProducto = {
+  fontSize: "1.2em",
+  fontWeight: "bold",
+  marginTop: "10px",
 };
 
 const buttonEliminar = {
@@ -123,7 +167,7 @@ const buttonEliminar = {
   border: "none",
   borderRadius: "5px",
   cursor: "pointer",
-  marginTop: "10px"
+  marginTop: "10px",
 };
 
 const buttonComprar = {
@@ -133,7 +177,7 @@ const buttonComprar = {
   borderRadius: "8px",
   fontWeight: "bold",
   cursor: "pointer",
-  marginTop: "20px"
+  marginTop: "20px",
 };
 
 const linkStyle = {
@@ -142,7 +186,7 @@ const linkStyle = {
   padding: "12px 20px",
   borderRadius: "8px",
   textDecoration: "none",
-  fontWeight: "bold"
+  fontWeight: "bold",
 };
 
 export default Carrito;

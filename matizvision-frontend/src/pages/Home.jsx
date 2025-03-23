@@ -12,18 +12,15 @@ const Home = () => {
   const [testimonios, setTestimonios] = useState([]);
 
   useEffect(() => {
-    // Obtener productos destacados
     api.get("/products")
       .then(response => setProductos(response.data))
-      .catch(error => console.error("Error al obtener productos:", error));
+      .catch(error => console.error("❌ Error al obtener productos:", error));
 
-    // Obtener testimonios de clientes
     api.get("/testimonios")
       .then(response => setTestimonios(response.data))
-      .catch(error => console.error("Error al obtener testimonios:", error));
+      .catch(error => console.error("❌ Error al obtener testimonios:", error));
   }, []);
 
-  // Configuración del Carrusel de Testimonios
   const carouselTestimonios = {
     dots: true,
     infinite: true,
@@ -47,13 +44,20 @@ const Home = () => {
     <div style={pageStyle}>
       <Navbar />
 
-      {/* Sección de Productos Destacados */}
+      {/* Productos Destacados */}
       <section style={productosSection}>
         <h2 style={sectionTitle}>🔥 Productos Destacados</h2>
         <div style={productosGrid}>
           {productos.length > 0 ? (
             productos.slice(0, 4).map(producto => (
               <div key={producto.id} style={productoCard}>
+                {producto.imagen && (
+                  <img
+                    src={`http://localhost:5000/uploads/${producto.imagen}`}
+                    alt={producto.nombre}
+                    style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "10px" }}
+                  />
+                )}
                 <h3 style={productoNombre}>{producto.nombre}</h3>
                 <p style={productoPrecio}>${producto.precio}</p>
                 <button style={buttonComprar}>Comprar</button>
@@ -65,7 +69,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Sección de Testimonios */}
+      {/* Testimonios */}
       <section style={testimoniosSection}>
         <h2 style={sectionTitle}>💬 Testimonios de nuestros clientes</h2>
         <Slider {...carouselTestimonios}>
@@ -85,7 +89,7 @@ const Home = () => {
         </Link>
       </section>
 
-      {/* Sección de Garantías */}
+      {/* Garantías */}
       <section style={garantiaSection}>
         <h2 style={sectionTitle}>🛡️ Nuestras Garantías</h2>
         <div style={garantiaGrid}>
@@ -113,14 +117,13 @@ const Home = () => {
   );
 };
 
-// 🎨 **Estilos Modernos y Minimalistas**
+// Estilos 🎨
 const pageStyle = {
   backgroundColor: "#F5F5F5",
   color: "#222",
   fontFamily: "'Poppins', sans-serif",
 };
 
-// Productos Destacados
 const productosSection = {
   padding: "60px",
   textAlign: "center",
@@ -173,7 +176,6 @@ const buttonComprar = {
   transition: "0.3s",
 };
 
-// Estilos para testimonios
 const testimoniosSection = {
   padding: "60px",
   textAlign: "center",
@@ -203,7 +205,6 @@ const buttonTestimonio = {
   transition: "0.3s",
 };
 
-// Estilos para Garantías
 const garantiaSection = {
   padding: "60px",
   textAlign: "center",

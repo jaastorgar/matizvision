@@ -1,24 +1,23 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../config/multerConfig");
 const {
-  obtenerProductosAdmin,
-  crearProductoAdmin,
-  actualizarProductoAdmin,
-  eliminarProductoAdmin,
-} = require("../securitycontroller/adminProductoController");
+  obtenerCitasAdmin,
+  crearCitaAdmin,
+  actualizarCitaAdmin,
+  eliminarCitaAdmin,
+} = require("../securitycontroller/adminCitaController");
 const { verifyToken, isAdmin } = require("../middlewares/authMiddleware");
 
-// 📌 Obtener todos los productos
-router.get("/", verifyToken, isAdmin, obtenerProductosAdmin);
+// 📌 Obtener todas las citas (Solo Admin)
+router.get("/", verifyToken, isAdmin, obtenerCitasAdmin);
 
-// 📌 Crear un nuevo producto con imagen
-router.post("/", verifyToken, isAdmin, upload.single("imagen"), crearProductoAdmin);
+//  📌 Crear un producto nuevo (Solo Admin)
+router.post("/", verifyToken, isAdmin, crearCitaAdmin);
 
-// 📌 Actualizar un producto con imagen opcional
-router.put("/:id", verifyToken, isAdmin, upload.single("imagen"), actualizarProductoAdmin);
+// 📌 Actualizar estado de una cita (Solo Admin)
+router.put("/:id", verifyToken, isAdmin, actualizarCitaAdmin);
 
-// 📌 Eliminar un producto
-router.delete("/:id", verifyToken, isAdmin, eliminarProductoAdmin);
+// 📌 Eliminar una cita (Solo Admin)
+router.delete("/:id", verifyToken, isAdmin, eliminarCitaAdmin);
 
 module.exports = router;
