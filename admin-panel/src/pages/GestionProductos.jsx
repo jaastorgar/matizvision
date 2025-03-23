@@ -6,7 +6,7 @@ const Container = styled.div`
   padding: 20px;
   color: white;
   min-height: 90vh;
-  width: 100%;
+  width: 200%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -39,7 +39,6 @@ const Button = styled.button`
   color: white;
   background-color: ${(props) => (props.$danger ? "red" : "#007BFF")};
   border-radius: 5px;
-
   &:hover {
     opacity: 0.8;
   }
@@ -79,9 +78,10 @@ const Input = styled.input`
 const GestionProductos = () => {
   const [productos, setProductos] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editando, setEditando] = useState(null);
   const [mensaje, setMensaje] = useState("");
 
-  const [nuevoProducto, setNuevoProducto] = useState({
+  const [formulario, setFormulario] = useState({
     nombre: "",
     descripcion: "",
     precio: "",
@@ -107,38 +107,89 @@ const GestionProductos = () => {
   };
 
   const handleInputChange = (e) => {
-    setNuevoProducto({ ...nuevoProducto, [e.target.name]: e.target.value });
+    setFormulario({ ...formulario, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e) => {
-    setNuevoProducto({ ...nuevoProducto, imagen: e.target.files[0] });
+    setFormulario({ ...formulario, imagen: e.target.files[0] });
   };
 
-  const handleAgregarProducto = async (e) => {
+  const abrirFormularioCrear = () => {
+    setFormulario({
+      nombre: "",
+      descripcion: "",
+      precio: "",
+      stock: "",
+      imagen: null,
+    });
+    setEditando(null);
+    setModalOpen(true);
+  };
+
+  const abrirFormularioEditar = (producto) => {
+    setFormulario({
+      nombre: producto.nombre,
+      descripcion: producto.descripcion,
+      precio: producto.precio,
+      stock: producto.stock,
+      imagen: null,
+    });
+    setEditando(producto.id);
+    setModalOpen(true);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
 
-      formData.append("nombre", nuevoProducto.nombre);
-      formData.append("descripcion", nuevoProducto.descripcion);
-      formData.append("precio", nuevoProducto.precio);
-      formData.append("stock", nuevoProducto.stock);
-      formData.append("imagen", nuevoProducto.imagen);
+      formData.append("nombre", formulario.nombre);
+      formData.append("descripcion", formulario.descripcion);
+      formData.append("precio", formulario.precio);
+      formData.append("stock", formulario.stock);
+      if (formulario.imagen) {
+        formData.append("imagen", formulario.imagen);
+      }
 
-      await api.post("/adminproducts", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      if (editando) {
+        await api.put(`/adminproducts/${editando}`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        setMensaje("✅ Producto actualizado.");
+      } else {
+        await api.post("/adminproducts", formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        setMensaje("✅ Producto agregado.");
+      }
 
       fetchProductos();
       setModalOpen(false);
-      setMensaje("✅ Producto agregado exitosamente.");
     } catch (error) {
-      console.error("❌ Error al agregar producto", error);
-      setMensaje("Error al agregar producto.");
+      console.error("❌ Error al guardar producto", error);
+      setMensaje("Error al guardar producto.");
+    }
+  };
+
+  const eliminarProducto = async (id) => {
+    if (!window.confirm("¿Estás seguro de eliminar este producto?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await api.delete(`/adminproducts/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMensaje("✅ Producto eliminado.");
+      fetchProductos();
+    } catch (error) {
+      console.error("❌ Error al eliminar producto", error);
+      setMensaje("Error al eliminar producto.");
     }
   };
 
@@ -146,16 +197,19 @@ const GestionProductos = () => {
     <Container>
       <h1>Gestión de Productos</h1>
       {mensaje && <p>{mensaje}</p>}
-      <Button onClick={() => setModalOpen(true)}>Agregar Producto</Button>
+      <Button onClick={abrirFormularioCrear}>Agregar Producto</Button>
 
       {modalOpen && (
         <FormContainer>
-          <Form onSubmit={handleAgregarProducto}>
-            <h2 style={{ color: "white" }}>Agregar Producto</h2>
+          <Form onSubmit={handleSubmit}>
+            <h2 style={{ color: "white" }}>
+              {editando ? "Editar Producto" : "Agregar Producto"}
+            </h2>
             <Input
               type="text"
               name="nombre"
               placeholder="Nombre"
+              value={formulario.nombre}
               onChange={handleInputChange}
               required
             />
@@ -163,6 +217,7 @@ const GestionProductos = () => {
               type="text"
               name="descripcion"
               placeholder="Descripción"
+              value={formulario.descripcion}
               onChange={handleInputChange}
               required
             />
@@ -170,6 +225,7 @@ const GestionProductos = () => {
               type="number"
               name="precio"
               placeholder="Precio"
+              value={formulario.precio}
               onChange={handleInputChange}
               required
             />
@@ -177,10 +233,11 @@ const GestionProductos = () => {
               type="number"
               name="stock"
               placeholder="Stock"
+              value={formulario.stock}
               onChange={handleInputChange}
               required
             />
-            <Input type="file" onChange={handleFileChange} required />
+            <Input type="file" onChange={handleFileChange} />
             <Button type="submit">Guardar</Button>
             <Button type="button" $danger onClick={() => setModalOpen(false)}>
               Cancelar
@@ -219,8 +276,12 @@ const GestionProductos = () => {
                 )}
               </Td>
               <Td>
-                <Button>Editar</Button>
-                <Button $danger>Eliminar</Button>
+                <Button onClick={() => abrirFormularioEditar(producto)}>
+                  Editar
+                </Button>
+                <Button $danger onClick={() => eliminarProducto(producto.id)}>
+                  Eliminar
+                </Button>
               </Td>
             </tr>
           ))}
