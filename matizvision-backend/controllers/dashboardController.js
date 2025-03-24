@@ -1,46 +1,45 @@
-const { Usuario, Cita, DetalleCompra } = require('../models');
+const { Usuario, Cita, Producto } = require('../models');
+const { Op } = require('sequelize');
 
 exports.getDashboardMetrics = async (req, res) => {
-    try {
-        console.log("📡 Obteniendo métricas del Dashboard...");
+  try {
+    console.log('📊 Obteniendo métricas del Dashboard...');
 
-        // 👤 Usuarios desglosados
-        const totalClientes = await Usuario.count({ where: { rol: 'cliente' } });
-        const totalAdministradores = await Usuario.count({ where: { rol: 'admin' } });
-        const totalTrabajadores = await Usuario.count({ where: { rol: 'trabajador' } });
+    // Obtener usuarios por rol
+    const clientes = await Usuario.count({ where: { rol: 'cliente' } });
+    const administradores = await Usuario.count({ where: { rol: 'admin' } });
+    const trabajadores = await Usuario.count({ where: { rol: 'trabajador' } });
 
-        // 📅 Citas desglosadas
-        const citasPendientes = await Cita.count({ where: { estado: 'pendiente' } });
-        const citasConfirmadas = await Cita.count({ where: { estado: 'confirmada' } });
-        const citasRechazadas = await Cita.count({ where: { estado: 'rechazada' } });
-        const citasReprogramadas = await Cita.count({ where: { estado: 'reprogramada' } });
+    // Obtener citas por estado
+    const citasPendientes = await Cita.count({ where: { estado: 'pendiente' } });
+    const citasConfirmadas = await Cita.count({ where: { estado: 'confirmada' } });
+    const citasRechazadas = await Cita.count({ where: { estado: 'rechazada' } });
+    const citasReprogramadas = await Cita.count({ where: { estado: 'reprogramada' } });
 
-        // 📦 Productos vendidos
-        const totalProductosVendidos = await DetalleCompra.sum('cantidad') || 0;
+    // Obtener productos con stock bajo (menor a 5)
+    const productosBajoStock = await Producto.findAll({
+      where: {
+        stock: {
+          [Op.lt]: 5,
+        },
+      },
+      attributes: ['nombre', 'stock'],
+    });
 
-        console.log("📊 Datos obtenidos:", {
-            clientes: totalClientes,
-            administradores: totalAdministradores,
-            trabajadores: totalTrabajadores,
-            citasPendientes,
-            citasConfirmadas,
-            citasRechazadas,
-            citasReprogramadas,
-            productosVendidos: totalProductosVendidos
-        });
+    console.log('📦 Productos con stock bajo:', productosBajoStock);
 
-        res.json({
-            clientes: totalClientes,
-            administradores: totalAdministradores,
-            trabajadores: totalTrabajadores,
-            citasPendientes,
-            citasConfirmadas,
-            citasRechazadas,
-            citasReprogramadas,
-            productosVendidos: totalProductosVendidos
-        });
-    } catch (error) {
-        console.error("❌ Error al obtener métricas:", error);
-        res.status(500).json({ message: "Error al obtener datos del dashboard" });
-    }
+    res.json({
+      clientes,
+      administradores,
+      trabajadores,
+      citasPendientes,
+      citasConfirmadas,
+      citasRechazadas,
+      citasReprogramadas,
+      productosBajoStock,
+    });
+  } catch (error) {
+    console.error('❌ Error al obtener métricas:', error);
+    res.status(500).json({ message: 'Error al obtener datos del dashboard' });
+  }
 };
