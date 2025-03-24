@@ -43,10 +43,13 @@ const CitasAgendadas = () => {
     });
   };
 
-  const formatHora = (hora) => {
-    if (!hora) return '00:00';
-    const [h, m] = hora.split(':');
-    return `${h}:${m}`;
+  const formatHora = (fecha) => {
+    return new Date(fecha).toLocaleTimeString("es-CL", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "America/Santiago"
+    });
   };
 
   const secciones = {
@@ -85,7 +88,7 @@ const CitasAgendadas = () => {
                   <div key={cita.id} style={{ ...styles.citaCard, borderLeft: `5px solid ${color}` }}>
                     <p>
                       📍 <strong>Fecha:</strong> <span style={styles.fecha}>{formatFecha(cita.fecha)}</span><br />
-                      ⏰ <strong>Hora:</strong> <span style={styles.hora}>{formatHora(cita.hora)}</span>
+                      ⏰ <strong>Hora:</strong> <span style={styles.hora}>{formatHora(cita.fecha)}</span>
                     </p>
                   </div>
                 ))
