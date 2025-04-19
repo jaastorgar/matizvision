@@ -2,15 +2,45 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Usuario } = require('../models');
 
+// Validadores personalizados
+const validarEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
+const validarPassword = (password) => password.length >= 8;
+const validarRut = (rut) => /^[0-9]{7,9}$/.test(rut);
+const validarDv = (dv) => /^[0-9kK]{1}$/.test(dv);
+const validarTelefono = (tel) => /^[0-9]{8,12}$/.test(tel);
+
 exports.register = async (req, res) => {
     try {
-        console.log("📩 Datos recibidos en el backend:", req.body);
-
         const { nombre, apellido_paterno, apellido_materno, rut, dv, telefono, email, password } = req.body;
 
+        // Validación de campos
         if (!nombre || !apellido_paterno || !apellido_materno || !rut || !dv || !telefono || !email || !password) {
-            console.warn("⚠️ Todos los campos son obligatorios");
             return res.status(400).json({ msg: "Todos los campos son obligatorios" });
+        }
+
+        if (!validarEmail(email)) {
+            return res.status(400).json({ msg: "Formato de correo no válido" });
+        }
+
+        if (!validarPassword(password)) {
+            return res.status(400).json({ msg: "La contraseña debe tener al menos 8 caracteres" });
+        }
+
+        if (!validarRut(rut)) {
+            return res.status(400).json({ msg: "El RUT debe tener entre 7 y 9 dígitos sin puntos ni guión" });
+        }
+
+        if (!validarDv(dv)) {
+            return res.status(400).json({ msg: "Dígito verificador inválido" });
+        }
+
+        if (!validarTelefono(telefono)) {
+            return res.status(400).json({ msg: "El teléfono debe contener entre 8 y 12 dígitos numéricos" });
+        }
+
+        const usuarioExistente = await Usuario.findOne({ where: { email } });
+        if (usuarioExistente) {
+            return res.status(409).json({ msg: "Ya existe un usuario con ese correo" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -26,7 +56,6 @@ exports.register = async (req, res) => {
             password: hashedPassword,
         });
 
-        console.log("✅ Usuario registrado con éxito:", nuevoUsuario.email);
         res.status(201).json({ msg: "Usuario registrado con éxito", usuario: nuevoUsuario });
     } catch (error) {
         console.error("❌ Error en el registro:", error);
@@ -36,32 +65,32 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
     try {
-        console.log("📩 Intento de inicio de sesión:", req.body.email);
-
         const { email, password } = req.body;
 
         if (!email || !password) {
-            console.warn("⚠️ Faltan credenciales");
             return res.status(400).json({ msg: "Correo y contraseña son obligatorios" });
+        }
+
+        if (!validarEmail(email)) {
+            return res.status(400).json({ msg: "Correo inválido" });
         }
 
         const user = await Usuario.findOne({ where: { email } });
         if (!user) {
-            console.warn("⚠️ Usuario no encontrado:", email);
             return res.status(400).json({ msg: "Usuario no encontrado" });
         }
 
-        console.log("🔑 Comparando contraseñas...");
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            console.warn("⚠️ Contraseña incorrecta para el usuario:", email);
             return res.status(400).json({ msg: "Contraseña incorrecta" });
         }
 
-        console.log("🔑 Generando token de autenticación...");
-        const token = jwt.sign({ id: user.id, rol: user.rol }, process.env.JWT_SECRET, { expiresIn: '10h' });
+        const token = jwt.sign(
+            { id: user.id, rol: user.rol },
+            process.env.JWT_SECRET,
+            { expiresIn: '10h' }
+        );
 
-        console.log("✅ Inicio de sesión exitoso para:", email);
         res.json({
             msg: "Inicio de sesión exitoso",
             token,
@@ -81,19 +110,15 @@ exports.login = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
     try {
-        console.log("🔍 Buscando perfil de usuario con ID:", req.user.id);
-
         const usuario = await Usuario.findByPk(req.user.id, {
             attributes: ["id", "nombre", "apellido_paterno", "apellido_materno", "rut", "dv", "telefono", "email", "rol"]
         });
 
         if (!usuario) {
-            console.warn("⚠️ Usuario no encontrado en la base de datos");
             return res.status(404).json({ msg: "Usuario no encontrado" });
         }
 
-        console.log("✅ Perfil obtenido correctamente y enviado al frontend:", usuario.toJSON());
-        res.status(200).json(usuario); // 🔹 Asegurar que la respuesta se envía correctamente.
+        res.status(200).json(usuario);
     } catch (error) {
         console.error("❌ Error al obtener perfil:", error);
         res.status(500).json({ msg: "Error en el servidor", error });

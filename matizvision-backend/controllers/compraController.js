@@ -1,78 +1,102 @@
-const { Compra, Usuario, Producto, DetalleCompra } = require('../models');
+const { Compra, DetalleCompra, Producto, Usuario } = require('../models');
 
-exports.getAllCompras = async (req, res) => {
-    try {
-        const compras = await Compra.findAll({ include: [Usuario, Producto] });
-        res.json(compras);
-    } catch (error) {
-        res.status(500).json({ msg: "Error al obtener compras", error });
-    }
+// Validador de carrito
+const validarCarrito = (carrito) => {
+  if (!Array.isArray(carrito) || carrito.length === 0) return false;
+  return carrito.every((item) => {
+    return (
+      typeof item.productoId === "number" &&
+      Number.isInteger(item.cantidad) &&
+      item.cantidad > 0
+    );
+  });
 };
 
 exports.createCompra = async (req, res) => {
-    try {
-        const { usuarioId, productos } = req.body;
+  try {
+    const { usuarioId, carrito } = req.body;
 
-        let total = 0;
-        for (const prod of productos) {
-            const producto = await Producto.findByPk(prod.productoId);
-            total += producto.precio * prod.cantidad;
-        }
-
-        const compra = await Compra.create({ usuarioId, total, estado: 'pendiente' });
-
-        for (const prod of productos) {
-            await DetalleCompra.create({
-                compraId: compra.id,
-                productoId: prod.productoId,
-                cantidad: prod.cantidad
-            });
-        }
-
-        res.status(201).json({ msg: "Compra realizada con éxito", compra });
-    } catch (error) {
-        res.status(500).json({ msg: "Error al realizar la compra", error });
+    if (!usuarioId) {
+      return res.status(400).json({ msg: "El ID de usuario es obligatorio." });
     }
-};
 
-exports.updateCompra = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { estado } = req.body;
-        await Compra.update({ estado }, { where: { id } });
-        res.json({ msg: "Compra actualizada con éxito" });
-    } catch (error) {
-        res.status(500).json({ msg: "Error al actualizar compra", error });
+    if (!validarCarrito(carrito)) {
+      return res.status(400).json({
+        msg: "El carrito debe contener productos válidos con cantidad mayor a 0.",
+      });
     }
+
+    const usuario = await Usuario.findByPk(usuarioId);
+    if (!usuario) {
+      return res.status(404).json({ msg: "Usuario no encontrado." });
+    }
+
+    // Calcular total
+    let total = 0;
+    for (const item of carrito) {
+      const producto = await Producto.findByPk(item.productoId);
+      if (!producto) {
+        return res.status(404).json({ msg: `Producto con ID ${item.productoId} no encontrado.` });
+      }
+      total += producto.precio * item.cantidad;
+    }
+
+    // Crear la compra
+    const nuevaCompra = await Compra.create({
+      usuarioId,
+      total,
+      estado: "pendiente",
+    });
+
+    // Guardar detalles de la compra
+    for (const item of carrito) {
+      await DetalleCompra.create({
+        compraId: nuevaCompra.id,
+        productoId: item.productoId,
+        cantidad: item.cantidad,
+      });
+    }
+
+    res.status(201).json({ msg: "Compra registrada exitosamente", compra: nuevaCompra });
+
+  } catch (error) {
+    console.error("❌ Error al registrar la compra:", error);
+    res.status(500).json({ msg: "Error al procesar la compra", error: error.message });
+  }
 };
 
 exports.obtenerComprasPorUsuario = async (req, res) => {
-    try {
-        const { usuarioId } = req.params;
+  try {
+    const { usuarioId } = req.params;
 
-        if (!usuarioId || isNaN(usuarioId)) {
-            return res.status(400).json({ msg: "ID de usuario no válido" });
-        }
+    const compras = await Compra.findAll({
+      where: { usuarioId },
+      include: [{ model: DetalleCompra, include: [Producto] }],
+    });
 
-        const compras = await Compra.findAll({
-            where: { usuarioId },
-            include: [
-                {
-                    model: DetalleCompra,
-                    as: "DetalleCompras",
-                    include: [{ model: Producto, attributes: ["nombre", "precio"] }]
-                }
-            ]
-        });
+    res.json(compras);
+  } catch (error) {
+    console.error("❌ Error al obtener compras:", error);
+    res.status(500).json({ msg: "Error interno del servidor", error: error.message });
+  }
+};
 
-        // Si no hay compras, devolver un array vacío
-        if (!compras || compras.length === 0) {
-            return res.status(200).json([]);
-        }
+exports.updateCompra = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
 
-        res.json(compras);
-    } catch (error) {
-        console.error("❌ Error al obtener compras:", error);
-        res.status(500).json({ msg: "Error interno al obtener compras" });
+    const compra = await Compra.findByPk(id);
+    if (!compra) {
+      return res.status(404).json({ msg: "Compra no encontrada" });
     }
+
+    compra.estado = estado;
+    await compra.save();
+
+    res.json({ msg: "Estado de la compra actualizado correctamente", compra });
+  } catch (error) {
+    console.error("❌ Error al actualizar compra:", error);
+    res.status(500).json({ msg: "Error interno al actualizar compra", error: error.message });
+  }
 };

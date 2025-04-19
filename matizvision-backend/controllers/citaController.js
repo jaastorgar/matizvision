@@ -1,28 +1,58 @@
 const { Cita } = require('../models');
 
+// ✅ Validadores manuales
+const esFechaValida = (fechaStr) => {
+    const fecha = new Date(fechaStr);
+    return !isNaN(fecha.getTime());
+};
+
+const esEmailValido = (email) => /^\S+@\S+\.\S+$/.test(email);
+const esTelefonoValido = (tel) => /^[0-9]{8,12}$/.test(tel);
+
 exports.createCita = async (req, res) => {
   try {
       const { fecha, hora, usuarioId, email, telefono } = req.body;
 
+      // Validar fecha y hora obligatorias
       if (!fecha || !hora) {
           return res.status(400).json({ msg: "❌ La fecha y la hora son obligatorias." });
       }
 
-      if (!usuarioId) { 
-        if (!email || !telefono) {
-            return res.status(400).json({ msg: "❌ El correo y teléfono son obligatorios para usuarios no registrados." });
-        }
+      // Validar que la fecha sea válida
+      const fechaHoraStr = `${fecha}T${hora}:00`;
+      if (!esFechaValida(fechaHoraStr)) {
+          return res.status(400).json({ msg: "❌ La fecha u hora no tienen un formato válido." });
       }
 
-      // Combinar fecha y hora correctamente antes de guardarla
-      const fechaHora = new Date(`${fecha}T${hora}:00`);
-      console.log("📅 Fecha y Hora guardada en la BD:", fechaHora);
+      const fechaHora = new Date(fechaHoraStr);
 
+      // Validar que la cita no sea en el pasado
+      const ahora = new Date();
+      if (fechaHora < ahora) {
+          return res.status(400).json({ msg: "❌ No puedes agendar una cita en el pasado." });
+      }
+
+      // Si no hay usuarioId → usuario anónimo → validar email y teléfono
+      if (!usuarioId) {
+          if (!email || !telefono) {
+              return res.status(400).json({ msg: "❌ El correo y teléfono son obligatorios para usuarios no registrados." });
+          }
+
+          if (!esEmailValido(email)) {
+              return res.status(400).json({ msg: "❌ El correo electrónico no es válido." });
+          }
+
+          if (!esTelefonoValido(telefono)) {
+              return res.status(400).json({ msg: "❌ El número de teléfono debe tener entre 8 y 12 dígitos." });
+          }
+      }
+
+      // Crear la cita
       const nuevaCita = await Cita.create({
-          usuarioId: usuarioId ? usuarioId : null,
-          fecha: fechaHora, // Guardamos la fecha y la hora correctamente
-          email: usuarioId ? null : email,  
-          telefono: usuarioId ? null : telefono, 
+          usuarioId: usuarioId || null,
+          fecha: fechaHora,
+          email: usuarioId ? null : email,
+          telefono: usuarioId ? null : telefono,
           estado: 'pendiente'
       });
 
