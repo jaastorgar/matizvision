@@ -13,6 +13,7 @@ function Citas() {
   const [telefono, setTelefono] = useState('');
   const [user, setUser] = useState(null);
   const [mensaje, setMensaje] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -27,7 +28,7 @@ function Citas() {
 
   useEffect(() => {
     if (examenSeleccionado) {
-      setFechasDisponibles(["2025-03-10", "2025-03-12", "2025-03-14"]);
+      setFechasDisponibles(["2025-04-20", "2025-04-21", "2025-04-22"]);
     }
   }, [examenSeleccionado]);
 
@@ -45,11 +46,8 @@ function Citas() {
     }
 
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
-
-      console.log("📅 Fecha seleccionada:", fecha);
-      console.log("⏰ Hora seleccionada:", hora);
-
       let citaData = { fecha, hora };
 
       if (user?.id) {
@@ -70,7 +68,7 @@ function Citas() {
 
       setTimeout(() => {
         window.location.href = "/";
-      }, 3000);
+      }, 2500);
 
       setExamenSeleccionado('');
       setFecha('');
@@ -79,112 +77,127 @@ function Citas() {
       setTelefono('');
     } catch (error) {
       console.error("❌ Error al solicitar la cita:", error);
-      setMensaje({ tipo: "error", texto: '❌ Error al solicitar la cita: ' + (error.response?.data?.msg || error.message) });
+      setMensaje({ tipo: "error", texto: '❌ ' + (error.response?.data?.msg || "Error inesperado.") });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <>
       <Navbar />
-      <div style={containerStyle}>
-        <div style={formStyle}>
-          <h2 style={titleStyle}>📅 Solicitar Cita</h2>
-          {mensaje && <p style={{ color: mensaje.tipo === "error" ? "red" : "green", textAlign: "center" }}>{mensaje.texto}</p>}
+      <section className="cita-wrapper">
+        <div className="cita-card">
+          <h2 className="cita-title">📅 Solicita tu Cita</h2>
 
-          <form onSubmit={handleSubmit} style={formContainerStyle}>
-            <label style={labelStyle}>Selecciona un examen:</label>
-            <select value={examenSeleccionado} onChange={(e) => setExamenSeleccionado(e.target.value)} required style={inputStyle}>
+          {mensaje && <p className={`cita-msg ${mensaje.tipo}`}>{mensaje.texto}</p>}
+
+          <form className="cita-form" onSubmit={handleSubmit}>
+            <label>Examen</label>
+            <select value={examenSeleccionado} onChange={(e) => setExamenSeleccionado(e.target.value)} required>
               <option value="">Selecciona una opción</option>
-              <option value="Examen Visual">👀 Examen Visual</option>
+              <option value="Examen Visual">👁 Examen Visual</option>
             </select>
 
             {examenSeleccionado && (
               <>
-                <label style={labelStyle}>Fecha disponible:</label>
-                <select value={fecha} onChange={(e) => setFecha(e.target.value)} required style={inputStyle}>
+                <label>Fecha</label>
+                <select value={fecha} onChange={(e) => setFecha(e.target.value)} required>
                   <option value="">Selecciona una fecha</option>
-                  {fechasDisponibles.map((f) => (
-                    <option key={f} value={f}>{f}</option>
-                  ))}
+                  {fechasDisponibles.map(f => <option key={f} value={f}>{f}</option>)}
                 </select>
               </>
             )}
 
             {fecha && (
               <>
-                <label style={labelStyle}>Hora disponible:</label>
-                <select value={hora} onChange={(e) => setHora(e.target.value)} required style={inputStyle}>
+                <label>Hora</label>
+                <select value={hora} onChange={(e) => setHora(e.target.value)} required>
                   <option value="">Selecciona una hora</option>
-                  {horasDisponibles.map((h) => (
-                    <option key={h} value={h}>{h}</option>
-                  ))}
+                  {horasDisponibles.map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
               </>
             )}
 
-            <button type="submit" style={buttonStyle}>📌 Solicitar Cita</button>
+            {!user && (
+              <>
+                <label>Correo electrónico</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+
+                <label>Teléfono</label>
+                <input type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} required />
+              </>
+            )}
+
+            <button type="submit" disabled={loading}>
+              {loading ? "Enviando..." : "📌 Solicitar Cita"}
+            </button>
           </form>
         </div>
-      </div>
+      </section>
       <Footer />
+
+      {/* Estilos embebidos */}
+      <style>{`
+        .cita-wrapper {
+          padding: 4rem 1rem;
+          background-color: #f9fafb;
+          display: flex;
+          justify-content: center;
+        }
+
+        .cita-card {
+          background: white;
+          padding: 2rem;
+          max-width: 480px;
+          width: 100%;
+          border-radius: 12px;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .cita-title {
+          text-align: center;
+          color: #2d8f2d;
+          margin-bottom: 1.5rem;
+        }
+
+        .cita-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .cita-form select,
+        .cita-form input {
+          padding: 0.75rem;
+          border-radius: 8px;
+          border: 1px solid #ccc;
+        }
+
+        .cita-form button {
+          background: #2d8f2d;
+          color: white;
+          padding: 0.75rem;
+          border: none;
+          border-radius: 8px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+        .cita-msg.error {
+          color: red;
+          text-align: center;
+          margin-bottom: 1rem;
+        }
+
+        .cita-msg.éxito {
+          color: green;
+          text-align: center;
+          margin-bottom: 1rem;
+        }
+      `}</style>
     </>
   );
 }
-
-// **Estilos**
-const containerStyle = {
-  padding: '40px',
-  backgroundColor: '#f0f0f0',
-  minHeight: '100vh',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center'
-};
-
-const formStyle = {
-  backgroundColor: '#ffffff',
-  padding: '30px',
-  borderRadius: '10px',
-  boxShadow: '0px 4px 8px rgba(0,0,0,0.1)',
-  width: '100%',
-  maxWidth: '500px'
-};
-
-const titleStyle = {
-  textAlign: 'center',
-  color: '#008000',
-  marginBottom: '20px'
-};
-
-const formContainerStyle = {
-  display: 'flex',
-  flexDirection: 'column'
-};
-
-const labelStyle = {
-  fontWeight: 'bold',
-  marginBottom: '5px'
-};
-
-const inputStyle = {
-  width: '100%',
-  padding: '10px',
-  marginBottom: '10px',
-  border: '1px solid #ccc',
-  borderRadius: '5px',
-  fontSize: '16px'
-};
-
-const buttonStyle = {
-  backgroundColor: '#008000',
-  color: '#ffffff',
-  padding: '12px',
-  border: 'none',
-  borderRadius: '5px',
-  width: '100%',
-  cursor: 'pointer',
-  fontSize: '18px',
-  marginTop: '15px'
-};
 
 export default Citas;

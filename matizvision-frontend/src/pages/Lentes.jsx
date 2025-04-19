@@ -1,24 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import Navbar from "../components/Navbar"; 
-import Footer from "../components/Footer";
 import api from "../api/axiosConfig";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
-const Lentes = () => {
+function Lentes() {
   const [productos, setProductos] = useState([]);
-  const [carrito, setCarrito] = useState(() => {
-    return JSON.parse(localStorage.getItem("carrito")) || [];
-  });
+  const [carrito, setCarrito] = useState(() => JSON.parse(localStorage.getItem("carrito")) || []);
+  const [filtro, setFiltro] = useState("");
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   useEffect(() => {
-    // Simulación de la llamada a la API (reemplazar con tu lógica real)
     const fetchProductos = async () => {
       try {
         const response = await api.get("/products");
         setProductos(response.data);
       } catch (error) {
-        console.error("Error al obtener productos:", error);
-        // Manejar el error adecuadamente (por ejemplo, mostrar un mensaje al usuario)
+        console.error("❌ Error al obtener productos:", error);
       }
     };
 
@@ -29,311 +26,226 @@ const Lentes = () => {
     const nuevoCarrito = [...carrito, producto];
     setCarrito(nuevoCarrito);
     localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
-
-    const eventoCarrito = new CustomEvent("actualizarCarrito", {
-      detail: nuevoCarrito.length
-    });
-    window.dispatchEvent(eventoCarrito);
+    window.dispatchEvent(new CustomEvent("actualizarCarrito", { detail: nuevoCarrito.length }));
   };
 
-  // --- Estilos ---
-  const containerStyle = {
-    backgroundColor: "#F5F5F5", // Gris muy claro para el fondo
-    color: "#333333", // Gris oscuro para el texto principal
-    fontFamily: "Montserrat, sans-serif", // Fuente moderna
-    display: "flex",
-    flexDirection: "column",
-    minHeight: "100vh" // Asegura que el contenido se extienda al menos al alto de la pantalla
-  };
-
-  const heroSectionStyle = {
-    padding: "100px 0",
-    textAlign: "center",
-    backgroundImage: `url('URL_DE_TU_IMAGEN')`, // Reemplazar con la URL de tu imagen de fondo
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    color: "#FFFFFF", // Texto blanco sobre la imagen de fondo
-    position: "relative",
-    // ... otros estilos
-  };
-
-  const heroOverlayStyle = {
-    // Estilo para un overlay sobre la imagen de fondo (opcional)
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Ejemplo: overlay negro con opacidad
-  };
-
-  const heroTitleStyle = {
-    fontSize: "3em",
-    fontWeight: "bold",
-    marginBottom: "20px"
-  };
-
-  const heroSubtitleStyle = {
-    fontSize: "1.5em",
-    marginBottom: "30px"
-  };
-
-  const searchBarStyle = {
-    // Estilos para la barra de búsqueda
-    padding: "10px",
-    width: "50%",
-    maxWidth: "400px",
-    borderRadius: "5px",
-    border: "none",
-    marginBottom: "20px",
-  };
-
-  const heroButtonStyle = {
-    // Estilos para el botón
-    backgroundColor: "#50C878",
-    color: "white",
-    padding: "15px 30px",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "1.2em",
-  };
-
-  const categorySectionStyle = {
-    display: "flex",
-    justifyContent: "center",
-    gap: "20px",
-    padding: "40px 0",
-    overflowX: "auto" // Para carrusel horizontal en pantallas pequeñas
-  };
-
-  const categoryCardStyle = {
-    backgroundColor: "#FFFFFF",
-    padding: "20px",
-    borderRadius: "10px",
-    textAlign: "center",
-    minWidth: "150px",
-    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-    cursor: "pointer",
-    // ... otros estilos
-  };
-
-  const categoryImageStyle = {
-    // Estilos para las imágenes de las categorías
-    width: "100%",
-    maxWidth: "100px",
-    height: "auto"
-  };
-
-  const filterSectionStyle = {
-    backgroundColor: "#FFFFFF",
-    padding: "20px",
-    borderBottom: "1px solid #E0E0E0"
-  };
-
-  const productGridStyle = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", // Tarjetas más anchas
-    gap: "30px",
-    padding: "40px",
-    justifyContent: "center" // Centrar las tarjetas
-  };
-
-  const productCardStyle = {
-    backgroundColor: "#FFFFFF",
-    borderRadius: "15px", // Bordes más redondeados
-    boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.1)", // Sombra más pronunciada
-    textAlign: "center",
-    position: "relative",
-    overflow: "hidden" //  Asegura que las imágenes no se desborden
-  };
-
-  const productImageStyle = {
-    width: "100%",
-    borderRadius: "10px 10px 0 0", // Redondeado solo en la parte superior
-    maxHeight: "300px", // Altura máxima para las imágenes
-    objectFit: "cover" // Ajusta la imagen al contenedor manteniendo la proporción
-  };
-
-  const productDetailsStyle = {
-    padding: "20px"
-  };
-
-  const productNameStyle = {
-    fontSize: "1.2em",
-    fontWeight: "bold",
-    marginBottom: "10px"
-  };
-
-  const productPriceStyle = {
-    fontSize: "1.5em",
-    fontWeight: "bold",
-    color: "#008080", // Verde azulado para el precio
-    marginBottom: "10px"
-  };
-
-  const addToCartButtonStyle = {
-    backgroundColor: "#50C878", // Verde esmeralda
-    color: "#FFFFFF",
-    padding: "12px 20px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    border: "none",
-    ":hover": {
-      backgroundColor: "#38A360" // Verde más oscuro al hacer hover
-    }
-  };
-
-  const featuredSectionStyle = {
-    // Estilos para la sección de destacados/promociones
-    padding: "40px 0",
-    textAlign: "center"
-  };
-
-  // --- Componentes (Ejemplo) ---
-  const HeroSection = () => (
-    <header style={heroSectionStyle}>
-      <div style={heroOverlayStyle}></div> {/* Overlay opcional */}
-      <h1 style={heroTitleStyle}>Encuentra tus Lentes Perfectos</h1>
-      <p style={heroSubtitleStyle}>Explora nuestra colección y descubre tu estilo ideal.</p>
-      {/* Barra de búsqueda */}
-      <input
-        type="text"
-        placeholder="Buscar por modelo, marca..."
-        style={searchBarStyle}
-      />
-      {/* Botón de llamada a la acción */}
-      <button style={heroButtonStyle}>Descubre la Colección</button>
-    </header>
-  );
-
-  const CategorySection = () => (
-    <section style={categorySectionStyle}>
-      {/* Carrusel o grilla de categorías */}
-      <CategoryCard
-        imageUrl="URL_IMAGEN_SOL" // Reemplazar
-        title="Lentes de Sol"
-      />
-      <CategoryCard
-        imageUrl="URL_IMAGEN_RECETADOS" // Reemplazar
-        title="Lentes Recetados"
-      />
-      <CategoryCard
-        imageUrl="URL_IMAGEN_DEPORTIVOS" // Reemplazar
-        title="Lentes Deportivos"
-      />
-      {/* ... Más categorías */}
-    </section>
-  );
-
-  const CategoryCard = ({ imageUrl, title }) => (
-    <div style={categoryCardStyle}>
-      <img src={imageUrl} alt={title} style={categoryImageStyle} />
-      <h3>{title}</h3>
-    </div>
-  );
-
-  const FilterSection = () => {
-    const [precio, setPrecio] = useState([0, 1000]); // Ejemplo de rango de precio
-    const [marca, setMarca] = useState("");
-    // ... Otros estados para los filtros
-
-    return (
-      <aside style={filterSectionStyle}>
-        <h2>Filtrar por:</h2>
-
-        {/* Filtro de Precio */}
-        <div>
-          <h3>Precio</h3>
-          <input
-            type="range"
-            min="0"
-            max="1000"
-            value={precio[0]}
-            onChange={(e) => setPrecio([e.target.value, precio[1]])}
-          />
-          <input
-            type="range"
-            min="0"
-            max="1000"
-            value={precio[1]}
-            onChange={(e) => setPrecio([precio[0], e.target.value])}
-          />
-          <p>Rango: ${precio[0]} - ${precio[1]}</p>
-        </div>
-
-        {/* Filtro de Marca */}
-        <div>
-          <h3>Marca</h3>
-          <select value={marca} onChange={(e) => setMarca(e.target.value)}>
-            <option value="">Todas</option>
-            <option value="Marca A">Marca A</option>
-            <option value="Marca B">Marca B</option>
-            {/* ... Más marcas */}
-          </select>
-        </div>
-
-        {/* ... Otros filtros (Forma, Material, Color, etc.) */}
-      </aside>
-    );
-  };
-
-  const ProductGrid = () => (
-    <main style={productGridStyle}>
-      {productos.map(producto => (
-        <ProductCard key={producto.id} producto={producto} />
-      ))}
-    </main>
-  );
-
-  const ProductCard = ({ producto }) => (
-    <div style={productCardStyle}>
-      <img
-        src={`http://localhost:5000/uploads/${producto.imagen}`}
-        alt={producto.nombre}
-        style={productImageStyle}
-      />
-      <div style={productDetailsStyle}>
-        <h3 style={productNameStyle}>{producto.nombre}</h3>
-        <p style={productPriceStyle}>${producto.precio}</p>
-        <button
-          onClick={() => agregarAlCarrito(producto)}
-          style={addToCartButtonStyle}
-        >
-          Añadir al Carrito
-        </button>
-      </div>
-    </div>
-  );
-
-  const FeaturedSection = () => (
-    <section style={featuredSectionStyle}>
-      {/* ... Carrusel o galería de destacados */}
-    </section>
+  const productosFiltrados = productos.filter((p) =>
+    p.nombre.toLowerCase().includes(filtro.toLowerCase())
   );
 
   return (
-    <div style={containerStyle}>
+    <>
       <Navbar />
+      <div className="lentes-hero">
+        <div className="lentes-overlay" />
+        <div className="lentes-hero-content">
+          <h1>Explora nuestra colección de lentes</h1>
+          <p>Estilo y visión para todos los días</p>
+          <input
+            type="text"
+            placeholder="Buscar por nombre o estilo"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+          />
+        </div>
+      </div>
 
-      {/* --- Hero Section --- */}
-      <HeroSection />
+      <div className="lentes-main">
+        <aside className={`lentes-sidebar ${mostrarFiltros ? "activo" : ""}`}>
+          <h3>Filtros</h3>
+          <label>
+            <input type="checkbox" />
+            Lentes de Sol
+          </label>
+          <label>
+            <input type="checkbox" />
+            Lentes Recetados
+          </label>
+          <label>
+            <input type="checkbox" />
+            Hombre
+          </label>
+          <label>
+            <input type="checkbox" />
+            Mujer
+          </label>
+        </aside>
 
-      {/* --- Sección de Categorías --- */}
-      <CategorySection />
+        <section className="lentes-productos">
+          <div className="lentes-toggle" onClick={() => setMostrarFiltros(!mostrarFiltros)}>
+            {mostrarFiltros ? "✖ Ocultar filtros" : "🔍 Mostrar filtros"}
+          </div>
 
-      {/* --- Sección de Filtros y Ordenamiento --- */}
-      <FilterSection />
-
-      {/* --- Sección de Productos --- */}
-      <ProductGrid />
-
-      {/* --- Sección de Destacados/Promociones --- */}
-      <FeaturedSection />
+          <div className="lentes-grid">
+            {productosFiltrados.length === 0 ? (
+              <p className="lentes-vacio">No se encontraron productos.</p>
+            ) : (
+              productosFiltrados.map((producto) => (
+                <div key={producto.id} className="lentes-card">
+                  <img
+                    src={`http://localhost:5000/uploads/${producto.imagen}`}
+                    alt={producto.nombre}
+                  />
+                  <h4>{producto.nombre}</h4>
+                  <p className="precio">${producto.precio}</p>
+                  <button onClick={() => agregarAlCarrito(producto)}>🛒 Añadir</button>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
 
       <Footer />
-    </div>
+
+      {/* Estilos embebidos */}
+      <style>{`
+        .lentes-hero {
+          background: url('https://images.unsplash.com/photo-1504196606672-aef5c9cefc92') center/cover no-repeat;
+          height: 60vh;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .lentes-overlay {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.5);
+          z-index: 1;
+        }
+
+        .lentes-hero-content {
+          color: white;
+          text-align: center;
+          z-index: 2;
+        }
+
+        .lentes-hero-content h1 {
+          font-size: 3rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .lentes-hero-content p {
+          font-size: 1.2rem;
+          margin-bottom: 1rem;
+        }
+
+        .lentes-hero-content input {
+          padding: 0.6rem 1rem;
+          width: 80%;
+          max-width: 400px;
+          border-radius: 8px;
+          border: none;
+        }
+
+        .lentes-main {
+          display: flex;
+          padding: 2rem;
+          gap: 2rem;
+        }
+
+        .lentes-sidebar {
+          min-width: 200px;
+          background: #f1f1f1;
+          padding: 1rem;
+          border-radius: 10px;
+          display: none;
+        }
+
+        .lentes-sidebar.activo {
+          display: block;
+        }
+
+        .lentes-sidebar h3 {
+          margin-bottom: 1rem;
+        }
+
+        .lentes-sidebar label {
+          display: block;
+          margin-bottom: 0.5rem;
+        }
+
+        .lentes-productos {
+          flex: 1;
+        }
+
+        .lentes-toggle {
+          cursor: pointer;
+          margin-bottom: 1rem;
+          font-weight: bold;
+        }
+
+        .lentes-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 1.5rem;
+        }
+
+        .lentes-card {
+          background: #fff;
+          border-radius: 12px;
+          padding: 1rem;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          text-align: center;
+          transition: transform 0.3s;
+        }
+
+        .lentes-card:hover {
+          transform: translateY(-5px);
+        }
+
+        .lentes-card img {
+          max-width: 100%;
+          border-radius: 8px;
+          height: 180px;
+          object-fit: cover;
+        }
+
+        .lentes-card h4 {
+          margin: 0.8rem 0 0.3rem;
+        }
+
+        .precio {
+          color: #009688;
+          font-weight: bold;
+          margin-bottom: 0.8rem;
+        }
+
+        .lentes-card button {
+          background: #2e7d32;
+          color: white;
+          padding: 0.5rem 1rem;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+
+        .lentes-card button:hover {
+          background: #1b5e20;
+        }
+
+        .lentes-vacio {
+          font-style: italic;
+          text-align: center;
+          color: #777;
+        }
+
+        @media (max-width: 768px) {
+          .lentes-main {
+            flex-direction: column;
+          }
+
+          .lentes-sidebar {
+            width: 100%;
+          }
+        }
+      `}</style>
+    </>
   );
-};
+}
 
 export default Lentes;
