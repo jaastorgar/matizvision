@@ -3,7 +3,7 @@ const { Usuario } = require('../models');
 
 const crearAdmin = async () => {
     try {
-        const email = 'javi@matizvision.cl';
+        const email = 'admin@matizvision.cl';
         console.log(`🔹 Verificando si el usuario admin (${email}) ya existe...`);
 
         // Verificar si ya existe un admin con ese correo
