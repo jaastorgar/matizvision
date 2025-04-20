@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import api from "../api/axiosConfig";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { Link } from "react-router-dom";
 
 function Lentes() {
   const [productos, setProductos] = useState([]);
-  const [carrito, setCarrito] = useState(() => JSON.parse(localStorage.getItem("carrito")) || []);
   const [filtro, setFiltro] = useState("");
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
@@ -21,13 +21,6 @@ function Lentes() {
 
     fetchProductos();
   }, []);
-
-  const agregarAlCarrito = (producto) => {
-    const nuevoCarrito = [...carrito, producto];
-    setCarrito(nuevoCarrito);
-    localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
-    window.dispatchEvent(new CustomEvent("actualizarCarrito", { detail: nuevoCarrito.length }));
-  };
 
   const productosFiltrados = productos.filter((p) =>
     p.nombre.toLowerCase().includes(filtro.toLowerCase())
@@ -53,22 +46,10 @@ function Lentes() {
       <div className="lentes-main">
         <aside className={`lentes-sidebar ${mostrarFiltros ? "activo" : ""}`}>
           <h3>Filtros</h3>
-          <label>
-            <input type="checkbox" />
-            Lentes de Sol
-          </label>
-          <label>
-            <input type="checkbox" />
-            Lentes Recetados
-          </label>
-          <label>
-            <input type="checkbox" />
-            Hombre
-          </label>
-          <label>
-            <input type="checkbox" />
-            Mujer
-          </label>
+          <label><input type="checkbox" /> Lentes de Sol</label>
+          <label><input type="checkbox" /> Lentes Recetados</label>
+          <label><input type="checkbox" /> Hombre</label>
+          <label><input type="checkbox" /> Mujer</label>
         </aside>
 
         <section className="lentes-productos">
@@ -82,13 +63,15 @@ function Lentes() {
             ) : (
               productosFiltrados.map((producto) => (
                 <div key={producto.id} className="lentes-card">
-                  <img
-                    src={`http://localhost:5000/uploads/${producto.imagen}`}
-                    alt={producto.nombre}
-                  />
-                  <h4>{producto.nombre}</h4>
-                  <p className="precio">${producto.precio}</p>
-                  <button onClick={() => agregarAlCarrito(producto)}>🛒 Añadir</button>
+                  <Link to={`/producto/${producto.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                    <img
+                      src={`http://localhost:5000/uploads/${producto.imagen}`}
+                      alt={producto.nombre}
+                    />
+                    <h4>{producto.nombre}</h4>
+                    <p className="precio">${producto.precio}</p>
+                    <p className="ver-mas">Ver más ➜</p>
+                  </Link>
                 </div>
               ))
             )}
@@ -98,7 +81,7 @@ function Lentes() {
 
       <Footer />
 
-      {/* Estilos embebidos */}
+      {/* Estilos CSS embebidos */}
       <style>{`
         .lentes-hero {
           background: url('https://images.unsplash.com/photo-1504196606672-aef5c9cefc92') center/cover no-repeat;
@@ -113,7 +96,7 @@ function Lentes() {
           position: absolute;
           width: 100%;
           height: 100%;
-          background: rgba(0,0,0,0.5);
+          background: rgba(0, 0, 0, 0.5);
           z-index: 1;
         }
 
@@ -145,6 +128,7 @@ function Lentes() {
           display: flex;
           padding: 2rem;
           gap: 2rem;
+          flex-wrap: wrap;
         }
 
         .lentes-sidebar {
@@ -188,7 +172,7 @@ function Lentes() {
           background: #fff;
           border-radius: 12px;
           padding: 1rem;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
           text-align: center;
           transition: transform 0.3s;
         }
@@ -211,21 +195,13 @@ function Lentes() {
         .precio {
           color: #009688;
           font-weight: bold;
-          margin-bottom: 0.8rem;
+          margin-bottom: 0.5rem;
         }
 
-        .lentes-card button {
-          background: #2e7d32;
-          color: white;
-          padding: 0.5rem 1rem;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-
-        .lentes-card button:hover {
-          background: #1b5e20;
+        .ver-mas {
+          font-size: 0.9rem;
+          color: #2e7d32;
+          font-weight: bold;
         }
 
         .lentes-vacio {

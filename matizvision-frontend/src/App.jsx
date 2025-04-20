@@ -9,6 +9,7 @@ import CitasAgendadas from './pages/CitasAgendadas';
 import Perfil from './pages/Perfil';
 import MisCompras from './pages/MisCompras';
 import DejarTestimonio from './pages/DejarTestimonio';
+import ProductoDetalle from './pages/ProductoDetalle';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route path="/perfil" element={<Perfil />} />
       <Route path="/compras" element={<MisCompras />} />
       <Route path="/dejar-testimonio" element={<DejarTestimonio />} />
+      <Route path="/producto/:id" element={<ProductoDetalle />} />
     </Routes>
   );
 }

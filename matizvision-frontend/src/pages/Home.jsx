@@ -3,9 +3,6 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import api from "../api/axiosConfig";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 
 const Home = () => {
   const [productos, setProductos] = useState([]);
@@ -21,27 +18,11 @@ const Home = () => {
       .catch((err) => console.error("❌ Testimonios:", err));
   }, []);
 
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 700,
-    slidesToShow: 2,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 4000,
-    responsive: [
-      {
-        breakpoint: 768,
-        settings: { slidesToShow: 1 },
-      },
-    ],
-  };
-
   return (
     <div className="home-wrapper">
       <Navbar />
 
-      {/* Hero principal */}
+      {/* Hero */}
       <section className="hero">
         <div className="hero-content">
           <h1>Óptica Matiz Vision</h1>
@@ -52,7 +33,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ¿Quiénes Somos? */}
+      {/* Quienes somos */}
       <section className="seccion quien-somos">
         <h2>¿Quiénes somos?</h2>
         <p>
@@ -62,7 +43,7 @@ const Home = () => {
         </p>
       </section>
 
-      {/* Visión y Misión */}
+      {/* Misión y Visión */}
       <section className="seccion mision-vision">
         <div className="card mv">
           <h3>🌟 Visión</h3>
@@ -80,32 +61,38 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Productos */}
+      {/* Productos destacados */}
       <section className="seccion destacados">
         <h2>🔥 Productos Destacados</h2>
-        <div className="productos-grid">
+        <div className="productos-grid-centrado">
           {productos.slice(0, 4).map((p) => (
-            <div key={p.id} className="producto-card">
+            <div key={p.id} className="card-producto">
               <img src={`http://localhost:5000/uploads/${p.imagen}`} alt={p.nombre} />
-              <h4>{p.nombre}</h4>
-              <p>${p.precio}</p>
-              <button>Ver más</button>
+              <div className="card-info">
+                <h4>{p.nombre}</h4>
+                <p className="precio">${p.precio}</p>
+                <Link to={`/producto/${p.id}`} className="ver-link">Ver más →</Link>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Testimonios */}
+      {/* Testimonios - NUEVO CARRUSEL */}
       <section className="seccion testimonios">
         <h2>💬 Lo que dicen nuestros clientes</h2>
-        <Slider {...sliderSettings}>
-          {testimonios.map((t) => (
-            <div key={t.id} className="testimonio-card">
-              <h4>{t.nombre}</h4>
-              <p>"{t.comentario}"</p>
-            </div>
-          ))}
-        </Slider>
+        <div className="testimonios-carrusel">
+          <div className="carrusel-track">
+            {[...testimonios, ...testimonios].map((t, i) => (
+              <div key={i} className="testimonio-slide">
+                <div className="testimonio-card">
+                  <h4>{t.nombre}</h4>
+                  <p>"{t.comentario}"</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
         <Link to="/dejar-testimonio">
           <button className="btn-testimonio">📝 Dejar Testimonio</button>
         </Link>
@@ -124,7 +111,6 @@ const Home = () => {
 
       <Footer />
 
-      {/* Estilos integrados */}
       <style>{`
         .home-wrapper {
           font-family: 'Poppins', sans-serif;
@@ -192,48 +178,96 @@ const Home = () => {
           box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        .destacados .productos-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        .productos-grid-centrado {
+          display: flex;
+          justify-content: center;
           gap: 20px;
-          margin-top: 30px;
+          flex-wrap: wrap;
+          max-width: 1200px;
+          margin: auto;
         }
 
-        .producto-card {
+        .card-producto {
           background: #fff;
+          width: 250px;
           border-radius: 12px;
-          padding: 1rem;
+          overflow: hidden;
           box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-          text-align: center;
+          transition: transform 0.3s;
         }
 
-        .producto-card img {
+        .card-producto:hover {
+          transform: translateY(-6px);
+        }
+
+        .card-producto img {
           width: 100%;
           height: 160px;
           object-fit: cover;
-          border-radius: 8px;
         }
 
-        .producto-card button {
-          margin-top: 10px;
-          background: #008000;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          padding: 8px 16px;
-          cursor: pointer;
+        .card-info {
+          padding: 1rem;
+          text-align: center;
         }
 
-        .testimonios {
-          background: #ffffff;
+        .card-info h4 {
+          margin-bottom: 0.5rem;
+        }
+
+        .card-info .precio {
+          color: #009688;
+          font-weight: bold;
+          margin-bottom: 0.5rem;
+        }
+
+        .ver-link {
+          display: inline-block;
+          margin-top: 6px;
+          font-weight: bold;
+          color: #2e7d32;
+          text-decoration: none;
+        }
+
+        .ver-link:hover {
+          text-decoration: underline;
+        }
+
+        .testimonios-carrusel {
+          overflow: hidden;
+          width: 100%;
+          max-width: 1000px;
+          margin: auto;
+          position: relative;
+        }
+
+        .carrusel-track {
+          display: flex;
+          animation: slide 20s linear infinite;
+          width: max-content;
+        }
+
+        .testimonio-slide {
+          flex: 0 0 300px;
+          margin: 0 10px;
         }
 
         .testimonio-card {
           background: #f3f3f3;
           padding: 20px;
-          margin: 10px;
           border-radius: 8px;
           box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+          text-align: center;
+          height: 100%;
+        }
+
+        @keyframes slide {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
         }
 
         .btn-testimonio {
@@ -262,8 +296,20 @@ const Home = () => {
         }
 
         @media (max-width: 768px) {
+          .productos-grid-centrado {
+            justify-content: center;
+          }
+
           .mision-vision {
             flex-direction: column;
+          }
+
+          .testimonio-slide {
+            flex: 0 0 80%;
+          }
+
+          .carrusel-track {
+            animation-duration: 30s;
           }
         }
       `}</style>
