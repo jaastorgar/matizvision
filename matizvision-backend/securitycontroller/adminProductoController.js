@@ -1,11 +1,9 @@
-const { Producto } = require("../models");
+const { Producto, AdminLog } = require("../models");
 
 // Obtener todos los productos
 exports.obtenerProductos = async (req, res) => {
   try {
-    console.log("📡 Obteniendo productos desde la base de datos...");
     const productos = await Producto.findAll();
-    console.log("📦 Productos encontrados:", productos);
     res.json(productos);
   } catch (error) {
     console.error("❌ Error al obtener productos:", error);
@@ -16,12 +14,10 @@ exports.obtenerProductos = async (req, res) => {
 // Crear un nuevo producto
 exports.crearProducto = async (req, res) => {
   try {
-    console.log("📩 Datos recibidos:", req.body);
     const { nombre, descripcion, precio, stock } = req.body;
     const imagen = req.file ? req.file.filename : null;
 
     if (!nombre || !descripcion || !precio || !stock || !imagen) {
-      console.warn("⚠️ Faltan datos obligatorios.");
       return res.status(400).json({ msg: "Todos los campos son obligatorios" });
     }
 
@@ -33,7 +29,6 @@ exports.crearProducto = async (req, res) => {
       imagen,
     });
 
-    console.log("✅ Producto creado con éxito:", nuevoProducto);
     res.status(201).json(nuevoProducto);
   } catch (error) {
     console.error("❌ Error al crear producto:", error);
@@ -79,6 +74,7 @@ exports.eliminarProductoAdmin = async (req, res) => {
     }
 
     await producto.destroy();
+
     res.json({ message: "Producto eliminado correctamente" });
   } catch (error) {
     console.error("❌ Error al eliminar el producto:", error);

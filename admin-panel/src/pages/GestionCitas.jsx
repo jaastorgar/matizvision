@@ -1,118 +1,142 @@
 import { useEffect, useState } from "react";
-import api from "../api/api"; 
+import api from "../api/api";
 import styled from "styled-components";
 
+// 🌟 Estilos modernos
 const Container = styled.div`
-  width: 100vw;
-  height: 80vh;
-  padding: 20px;
-  background-color: #f8f9fa;
-  color: black;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  overflow: hidden;
+  min-height: 100vh;
+  padding: 50px 20px;
+  background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+  font-family: 'Segoe UI', sans-serif;
 `;
 
-const Title = styled.h2`
-  font-size: 24px;
-  margin-bottom: 15px;
-  white-space: nowrap;
+const Title = styled.h1`
   text-align: center;
+  font-size: 32px;
+  color: #2c3e50;
+  margin-bottom: 30px;
 `;
 
 const TableWrapper = styled.div`
-  width: 90%;
-  max-width: 1200px;
-  overflow: auto;
-  max-height: 60vh;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: white;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  overflow-x: auto;
 `;
 
 const Table = styled.table`
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
 `;
 
 const Thead = styled.thead`
-  position: sticky;
-  top: 0;
-  background: #343a40;
+  background-color: #34495e;
   color: white;
-  z-index: 100;
 `;
 
 const Th = styled.th`
-  padding: 12px;
-  text-align: left;
-  background: #343a40;
-  color: white;
-  position: sticky;
-  top: 0;
+  padding: 16px;
+  font-weight: bold;
+`;
+
+const Tr = styled.tr`
+  &:hover {
+    background-color: #f0f4f8;
+  }
 `;
 
 const Td = styled.td`
-  padding: 12px;
-  border-bottom: 1px solid #ccc;
+  padding: 14px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  color: #2c3e50;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 `;
 
 const Button = styled.button`
-  margin: 5px;
-  padding: 8px 12px;
+  padding: 6px 12px;
+  font-size: 13px;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
   color: white;
-  border-radius: 5px;
-  font-size: 14px;
-  background: ${(props) =>
-    props["data-action"] === "confirmar" ? "green" :
-    props["data-action"] === "reagendar" ? "blue" :
-    props["data-action"] === "rechazar" ? "red" : "gray"};
+  background-color: ${({ type }) =>
+    type === "confirmar" ? "#27ae60" :
+    type === "reagendar" ? "#2980b9" :
+    type === "rechazar" ? "#e74c3c" :
+    type === "eliminar" ? "#7f8c8d" : "#bdc3c7"};
+
+  &:hover {
+    opacity: 0.85;
+    transform: scale(1.03);
+    transition: 0.2s;
+  }
+`;
+
+const Message = styled.p`
+  text-align: center;
+  color: ${({ error }) => (error ? "#e74c3c" : "#2ecc71")};
+  margin-bottom: 15px;
+  font-weight: 600;
 `;
 
 const GestionCitas = () => {
   const [citas, setCitas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [mensaje, setMensaje] = useState("");
+  const [error, setError] = useState("");
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetchCitas();
+    obtenerCitas();
   }, []);
 
-  const fetchCitas = async () => {
-    setLoading(true);
+  const obtenerCitas = async () => {
+    setCargando(true);
     try {
       const token = localStorage.getItem("token");
-      console.log("🔍 Enviando solicitud a API...");
-      
-      const response = await api.get("/admincitas", {
+      const res = await api.get("/admincitas", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      console.log("✅ Datos recibidos:", response.data);
-      setCitas(Array.isArray(response.data) ? response.data : []);
+      setCitas(res.data || []);
     } catch (err) {
-      setError("Error al cargar citas.");
-      console.error("❌ Error al obtener citas:", err);
+      setError("❌ Error al obtener citas.");
     }
-    setLoading(false);
+    setCargando(false);
   };
 
-  const actualizarEstadoCita = async (id, nuevoEstado) => {
+  const actualizarCita = async (id, estado) => {
     try {
       const token = localStorage.getItem("token");
-      await api.put(`/admincitas/${id}`, { estado: nuevoEstado }, {
+      await api.put(`/admincitas/${id}`, { estado }, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMensaje(`✅ Cita ${id} actualizada a ${nuevoEstado}`);
-      fetchCitas();
+      setMensaje(`✅ Cita ${id} actualizada a ${estado}`);
+      obtenerCitas();
     } catch (err) {
-      console.error("❌ Error al actualizar cita:", err);
-      setMensaje("⚠️ Error al actualizar cita.");
+      setError("⚠️ Error al actualizar cita.");
+    }
+  };
+
+  const eliminarCita = async (id) => {
+    const confirmar = window.confirm(`¿Estás seguro de eliminar la cita ${id}?`);
+    if (!confirmar) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await api.delete(`/admincitas/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMensaje(`🗑️ Cita ${id} eliminada correctamente.`);
+      obtenerCitas();
+    } catch (err) {
+      setError("❌ No se pudo eliminar la cita.");
     }
   };
 
@@ -120,13 +144,14 @@ const GestionCitas = () => {
     <Container>
       <Title>📅 Gestión de Citas</Title>
 
-      {mensaje && <p style={{ color: "yellow" }}>{mensaje}</p>}
+      {mensaje && <Message>{mensaje}</Message>}
+      {error && <Message error>{error}</Message>}
 
-      {loading ? (
-        <p>🔄 Cargando citas...</p>
-      ) : error ? (
-        <p style={{ color: "red" }}>⚠️ {error}</p>
-      ) : citas.length > 0 ? (
+      {cargando ? (
+        <Message>Cargando citas...</Message>
+      ) : citas.length === 0 ? (
+        <Message>🚫 No hay citas disponibles.</Message>
+      ) : (
         <TableWrapper>
           <Table>
             <Thead>
@@ -144,39 +169,27 @@ const GestionCitas = () => {
               {citas.map((cita) => {
                 const fechaCita = new Date(cita.fecha);
                 return (
-                  <tr key={cita.id}>
+                  <Tr key={cita.id}>
                     <Td>{cita.id}</Td>
-                    <Td>{fechaCita.toISOString().split("T")[0]}</Td>
-                    <Td>
-                      {fechaCita.toLocaleTimeString("es-CL", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                        timeZone: "America/Santiago",
-                      })}
-                    </Td>
-                    <Td>{cita.clienteNombre || "No disponible"}</Td>
-                    <Td>{cita.clienteTelefono || "No disponible"}</Td>
+                    <Td>{fechaCita.toLocaleDateString()}</Td>
+                    <Td>{fechaCita.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit", hour12: false })}</Td>
+                    <Td>{cita.clienteNombre || "Sin nombre"}</Td>
+                    <Td>{cita.clienteTelefono || "Sin teléfono"}</Td>
                     <Td>{cita.estado}</Td>
                     <Td>
-                      <Button data-action="confirmar" onClick={() => actualizarEstadoCita(cita.id, "confirmada")}>
-                        ✅ Confirmar
-                      </Button>
-                      <Button data-action="reagendar" onClick={() => actualizarEstadoCita(cita.id, "reprogramada")}>
-                        🔄 Reprogramar
-                      </Button>
-                      <Button data-action="rechazar" onClick={() => actualizarEstadoCita(cita.id, "rechazada")}>
-                        ❌ Rechazar
-                      </Button>
+                      <ButtonGroup>
+                        <Button type="confirmar" onClick={() => actualizarCita(cita.id, "confirmada")}>Confirmar</Button>
+                        <Button type="reagendar" onClick={() => actualizarCita(cita.id, "reprogramada")}>Reprogramar</Button>
+                        <Button type="rechazar" onClick={() => actualizarCita(cita.id, "rechazada")}>Rechazar</Button>
+                        <Button type="eliminar" onClick={() => eliminarCita(cita.id)}>Eliminar</Button>
+                      </ButtonGroup>
                     </Td>
-                  </tr>
+                  </Tr>
                 );
               })}
             </tbody>
           </Table>
         </TableWrapper>
-      ) : (
-        <p>🚫 No hay citas registradas.</p>
       )}
     </Container>
   );

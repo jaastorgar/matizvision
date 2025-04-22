@@ -2,85 +2,115 @@ import React, { useState, useEffect } from "react";
 import api from "../api/api";
 import styled from "styled-components";
 
+// Estilos
 const Container = styled.div`
-  padding: 20px;
-  color: white;
-  min-height: 90vh;
-  width: 200%;
+  padding: 2rem;
+  background-color: #f6f9fc;
+  min-height: 100vh;
+  color: #333;
+  font-family: 'Segoe UI', sans-serif;
+`;
+
+const Title = styled.h1`
+  text-align: center;
+  color: #222;
+  margin-bottom: 1rem;
+`;
+
+const Message = styled.p`
+  text-align: center;
+  margin-bottom: 1rem;
+  color: ${({ error }) => (error ? "#c0392b" : "#27ae60")};
+`;
+
+const Actions = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+`;
+
+const Button = styled.button`
+  background-color: ${({ danger }) => (danger ? "#e74c3c" : "#3498db")};
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: 8px;
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+const TableWrapper = styled.div`
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  min-width: 850px;
 `;
 
 const Th = styled.th`
-  background-color: #333;
+  background-color: #2c3e50;
   color: white;
-  padding: 10px;
-  border: 1px solid #ddd;
+  padding: 12px;
 `;
 
 const Td = styled.td`
-  padding: 10px;
-  border: 1px solid #ddd;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
   text-align: center;
 `;
 
-const Button = styled.button`
-  padding: 10px 15px;
-  margin: 5px;
-  cursor: pointer;
-  border: none;
-  color: white;
-  background-color: ${(props) => (props.$danger ? "red" : "#007BFF")};
-  border-radius: 5px;
-  &:hover {
-    opacity: 0.8;
-  }
+const Img = styled.img`
+  width: 50px;
+  border-radius: 4px;
 `;
 
-const FormContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
+// Modal
+const Overlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 999;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const Modal = styled.div`
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 500px;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  background: #222;
-  padding: 20px;
-  border-radius: 8px;
-  width: 50%;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+  gap: 12px;
 `;
 
 const Input = styled.input`
   padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-  color: #000;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 `;
 
 const GestionProductos = () => {
   const [productos, setProductos] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editando, setEditando] = useState(null);
-  const [mensaje, setMensaje] = useState("");
-
   const [formulario, setFormulario] = useState({
     nombre: "",
     descripcion: "",
@@ -88,33 +118,27 @@ const GestionProductos = () => {
     stock: "",
     imagen: null,
   });
+  const [editando, setEditando] = useState(null);
+  const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
-    fetchProductos();
+    obtenerProductos();
   }, []);
 
-  const fetchProductos = async () => {
+  const obtenerProductos = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await api.get("/adminproducts", {
+      const res = await api.get("/adminproducts", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProductos(response.data);
-    } catch (error) {
-      console.error("❌ Error al obtener productos", error);
-      setMensaje("Error al obtener productos.");
+      setProductos(res.data);
+    } catch (err) {
+      setMensaje("❌ Error al obtener productos.");
     }
   };
 
-  const handleInputChange = (e) => {
-    setFormulario({ ...formulario, [e.target.name]: e.target.value });
-  };
-
-  const handleFileChange = (e) => {
-    setFormulario({ ...formulario, imagen: e.target.files[0] });
-  };
-
-  const abrirFormularioCrear = () => {
+  const abrirCrear = () => {
+    setEditando(null);
     setFormulario({
       nombre: "",
       descripcion: "",
@@ -122,20 +146,27 @@ const GestionProductos = () => {
       stock: "",
       imagen: null,
     });
-    setEditando(null);
     setModalOpen(true);
   };
 
-  const abrirFormularioEditar = (producto) => {
+  const abrirEditar = (prod) => {
+    setEditando(prod.id);
     setFormulario({
-      nombre: producto.nombre,
-      descripcion: producto.descripcion,
-      precio: producto.precio,
-      stock: producto.stock,
+      nombre: prod.nombre,
+      descripcion: prod.descripcion,
+      precio: prod.precio,
+      stock: prod.stock,
       imagen: null,
     });
-    setEditando(producto.id);
     setModalOpen(true);
+  };
+
+  const handleChange = (e) => {
+    setFormulario({ ...formulario, [e.target.name]: e.target.value });
+  };
+
+  const handleFile = (e) => {
+    setFormulario({ ...formulario, imagen: e.target.files[0] });
   };
 
   const handleSubmit = async (e) => {
@@ -143,14 +174,9 @@ const GestionProductos = () => {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
-
-      formData.append("nombre", formulario.nombre);
-      formData.append("descripcion", formulario.descripcion);
-      formData.append("precio", formulario.precio);
-      formData.append("stock", formulario.stock);
-      if (formulario.imagen) {
-        formData.append("imagen", formulario.imagen);
-      }
+      Object.entries(formulario).forEach(([key, value]) => {
+        if (value) formData.append(key, value);
+      });
 
       if (editando) {
         await api.put(`/adminproducts/${editando}`, formData, {
@@ -167,126 +193,94 @@ const GestionProductos = () => {
             "Content-Type": "multipart/form-data",
           },
         });
-        setMensaje("✅ Producto agregado.");
+        setMensaje("✅ Producto creado.");
       }
 
-      fetchProductos();
       setModalOpen(false);
-    } catch (error) {
-      console.error("❌ Error al guardar producto", error);
-      setMensaje("Error al guardar producto.");
+      obtenerProductos();
+    } catch (err) {
+      console.error("❌ Error al guardar producto", err);
+      setMensaje("❌ Error al guardar producto.");
     }
   };
 
   const eliminarProducto = async (id) => {
-    if (!window.confirm("¿Estás seguro de eliminar este producto?")) return;
+    const confirm = window.confirm("¿Eliminar este producto?");
+    if (!confirm) return;
+
     try {
       const token = localStorage.getItem("token");
       await api.delete(`/adminproducts/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMensaje("✅ Producto eliminado.");
-      fetchProductos();
-    } catch (error) {
-      console.error("❌ Error al eliminar producto", error);
-      setMensaje("Error al eliminar producto.");
+      setMensaje("🗑️ Producto eliminado.");
+      obtenerProductos();
+    } catch (err) {
+      console.error("❌ Error al eliminar producto", err);
+      setMensaje("❌ Error al eliminar producto.");
     }
   };
 
   return (
     <Container>
-      <h1>Gestión de Productos</h1>
-      {mensaje && <p>{mensaje}</p>}
-      <Button onClick={abrirFormularioCrear}>Agregar Producto</Button>
+      <Title>📦 Gestión de Productos</Title>
+      {mensaje && <Message>{mensaje}</Message>}
+      <Actions>
+        <Button onClick={abrirCrear}>➕ Agregar Producto</Button>
+      </Actions>
+
+      <TableWrapper>
+        <Table>
+          <thead>
+            <tr>
+              <Th>ID</Th>
+              <Th>Nombre</Th>
+              <Th>Descripción</Th>
+              <Th>Precio</Th>
+              <Th>Stock</Th>
+              <Th>Imagen</Th>
+              <Th>Acciones</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {productos.map((p) => (
+              <tr key={p.id}>
+                <Td>{p.id}</Td>
+                <Td>{p.nombre}</Td>
+                <Td>{p.descripcion}</Td>
+                <Td>${p.precio}</Td>
+                <Td>{p.stock}</Td>
+                <Td>
+                  {p.imagen && (
+                    <Img src={`http://localhost:5000/uploads/${p.imagen}`} alt={p.nombre} />
+                  )}
+                </Td>
+                <Td>
+                  <Button onClick={() => abrirEditar(p)}>✏️ Editar</Button>
+                  <Button danger onClick={() => eliminarProducto(p.id)}>🗑️ Eliminar</Button>
+                </Td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </TableWrapper>
 
       {modalOpen && (
-        <FormContainer>
-          <Form onSubmit={handleSubmit}>
-            <h2 style={{ color: "white" }}>
-              {editando ? "Editar Producto" : "Agregar Producto"}
-            </h2>
-            <Input
-              type="text"
-              name="nombre"
-              placeholder="Nombre"
-              value={formulario.nombre}
-              onChange={handleInputChange}
-              required
-            />
-            <Input
-              type="text"
-              name="descripcion"
-              placeholder="Descripción"
-              value={formulario.descripcion}
-              onChange={handleInputChange}
-              required
-            />
-            <Input
-              type="number"
-              name="precio"
-              placeholder="Precio"
-              value={formulario.precio}
-              onChange={handleInputChange}
-              required
-            />
-            <Input
-              type="number"
-              name="stock"
-              placeholder="Stock"
-              value={formulario.stock}
-              onChange={handleInputChange}
-              required
-            />
-            <Input type="file" onChange={handleFileChange} />
-            <Button type="submit">Guardar</Button>
-            <Button type="button" $danger onClick={() => setModalOpen(false)}>
-              Cancelar
-            </Button>
-          </Form>
-        </FormContainer>
+        <Overlay>
+          <Modal>
+            <h2>{editando ? "✏️ Editar Producto" : "➕ Nuevo Producto"}</h2>
+            <Form onSubmit={handleSubmit}>
+              <Input name="nombre" value={formulario.nombre} onChange={handleChange} placeholder="Nombre" required />
+              <Input name="descripcion" value={formulario.descripcion} onChange={handleChange} placeholder="Descripción" required />
+              <Input name="precio" type="number" value={formulario.precio} onChange={handleChange} placeholder="Precio" required />
+              <Input name="stock" type="number" value={formulario.stock} onChange={handleChange} placeholder="Stock" required />
+              <Input type="file" onChange={handleFile} />
+              <Button type="submit">💾 Guardar</Button>
+              <Button type="button" danger onClick={() => setModalOpen(false)}>Cancelar</Button>
+            </Form>
+          </Modal>
+        </Overlay>
       )}
-
-      <Table>
-        <thead>
-          <tr>
-            <Th>ID</Th>
-            <Th>Nombre</Th>
-            <Th>Descripción</Th>
-            <Th>Precio</Th>
-            <Th>Stock</Th>
-            <Th>Imagen</Th>
-            <Th>Acciones</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {productos.map((producto) => (
-            <tr key={producto.id}>
-              <Td>{producto.id}</Td>
-              <Td>{producto.nombre}</Td>
-              <Td>{producto.descripcion}</Td>
-              <Td>${producto.precio}</Td>
-              <Td>{producto.stock}</Td>
-              <Td>
-                {producto.imagen && (
-                  <img
-                    src={`http://localhost:5000/uploads/${producto.imagen}`}
-                    alt={producto.nombre}
-                    width="50"
-                  />
-                )}
-              </Td>
-              <Td>
-                <Button onClick={() => abrirFormularioEditar(producto)}>
-                  Editar
-                </Button>
-                <Button $danger onClick={() => eliminarProducto(producto.id)}>
-                  Eliminar
-                </Button>
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
     </Container>
   );
 };

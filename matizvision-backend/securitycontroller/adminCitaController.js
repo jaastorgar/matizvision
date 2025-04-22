@@ -1,10 +1,8 @@
-const { Cita, Usuario } = require("../models");
+const { Cita, Usuario, AdminLog } = require("../models");
 
 // 📌 Obtener todas las citas con la información del cliente
 exports.obtenerCitasAdmin = async (req, res) => {
   try {
-    console.log("📡 Solicitando citas desde el backend...");
-
     const citas = await Cita.findAll({
       include: [
         {
@@ -16,7 +14,6 @@ exports.obtenerCitasAdmin = async (req, res) => {
     });
 
     if (!citas || citas.length === 0) {
-      console.log("🚫 No hay citas registradas.");
       return res.status(404).json({ message: "No hay citas disponibles." });
     }
 
@@ -28,7 +25,6 @@ exports.obtenerCitasAdmin = async (req, res) => {
       clienteTelefono: cita.cliente ? cita.cliente.telefono : "No disponible",
     }));
 
-    console.log("✅ Citas obtenidas correctamente:", citasConCliente);
     res.json(citasConCliente);
   } catch (error) {
     console.error("❌ Error al obtener citas:", error.message);
@@ -41,12 +37,12 @@ exports.crearCitaAdmin = async (req, res) => {
   try {
     const { usuarioId, fecha, estado } = req.body;
 
-    // Validar datos
     if (!usuarioId || !fecha || !estado) {
       return res.status(400).json({ message: "Todos los campos son obligatorios" });
     }
 
     const nuevaCita = await Cita.create({ usuarioId, fecha, estado });
+
     res.status(201).json(nuevaCita);
   } catch (error) {
     console.error("❌ Error al crear la cita:", error);
@@ -66,6 +62,7 @@ exports.actualizarCitaAdmin = async (req, res) => {
     }
 
     await cita.update({ fecha, estado });
+
     res.json({ message: "Cita actualizada correctamente", cita });
   } catch (error) {
     console.error("❌ Error al actualizar la cita:", error);
@@ -84,6 +81,7 @@ exports.eliminarCitaAdmin = async (req, res) => {
     }
 
     await cita.destroy();
+
     res.json({ message: "Cita eliminada correctamente" });
   } catch (error) {
     console.error("❌ Error al eliminar la cita:", error);

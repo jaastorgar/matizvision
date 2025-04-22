@@ -1,7 +1,7 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize } = require('sequelize');
 const sequelize = require('../config/database');
 
-// Importar modelos existentes
+// Solo importás los modelos (ya están inicializados)
 const Usuario = require('./usuario');
 const Producto = require('./producto');
 const Compra = require('./compra');
@@ -33,15 +33,14 @@ AdminLogs.belongsTo(Usuario, { foreignKey: 'adminId' });
 Usuario.hasMany(Cita, { foreignKey: "usuarioId", as: "citas" });
 Cita.belongsTo(Usuario, { foreignKey: "usuarioId", as: "cliente" });
 
-// Exportar modelos
 module.exports = {
-    sequelize,
-    Usuario,
-    Producto,
-    Compra,
-    DetalleCompra,
-    Cita,
-    AdminLogs,
-    Testimonio,
-    PanelSettings
+  sequelize,
+  Usuario,
+  Producto,
+  Compra,
+  DetalleCompra,
+  Cita,
+  AdminLogs,
+  Testimonio,
+  PanelSettings
 };

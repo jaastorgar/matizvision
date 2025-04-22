@@ -15,4 +15,7 @@ router.put('/:id', verifyToken, isAdmin, userController.updateUser);
 // 🗑 Eliminar usuario (solo admin)
 router.delete('/:id', verifyToken, isAdmin, userController.deleteUser);
 
+// 🆕 Crear usuario (solo admin)
+router.post('/', verifyToken, isAdmin, userController.crearUsuario);
+
 module.exports = router;
