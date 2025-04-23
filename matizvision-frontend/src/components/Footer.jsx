@@ -1,22 +1,51 @@
-import React from "react";
+import styled from 'styled-components';
+import { FaFacebookF, FaInstagram, FaWhatsapp, FaLinkedin } from 'react-icons/fa';
+
+const FooterContainer = styled.footer`
+  width: 100%;
+  padding: 20px 0;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+  margin-top: 50px;
+`;
+
+const SocialIcons = styled.div`
+  display: flex;
+  gap: 15px;
+
+  a {
+    color: #1a1a1a;
+    font-size: 20px;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: #0a66c2;
+    }
+  }
+`;
+
+const FooterText = styled.p`
+  font-size: 14px;
+  margin: 0;
+`;
 
 const Footer = () => {
   return (
-    <footer style={footerStyle}>
-      <p>&copy; 2025 Matiz Vision - Todos los derechos reservados</p>
-      <p>Contacto: info@matizvision.com | Tel: +56 9 1234 5678</p>
-    </footer>
+    <FooterContainer>
+      <SocialIcons>
+        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"><FaFacebookF /></a>
+        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
+        <a href="https://wa.me/56912345678" target="_blank" rel="noopener noreferrer"><FaWhatsapp /></a>
+        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
+      </SocialIcons>
+      <FooterText>&copy; 2025 Matiz Vision. Todos los derechos reservados.</FooterText>
+    </FooterContainer>
   );
-};
-
-// ✅ **Estilos**
-const footerStyle = {
-  backgroundColor: "#ffffff", // ✅ Se cambió a blanco
-  color: "#0a0a1f",
-  textAlign: "center",
-  padding: "15px",
-  marginTop: "20px",
-  borderTop: "2px solid #00ffff",
 };
 
 export default Footer;

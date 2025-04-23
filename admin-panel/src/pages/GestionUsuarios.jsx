@@ -1,23 +1,19 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import api from "../api/api";
 
 export default function GestionUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
   const [busqueda, setBusqueda] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    nombre: "",
-    email: "",
-    telefono: "",
-    rol: "cliente",
-  });
+  const [usuarioActivo, setUsuarioActivo] = useState(null);
+  const [esAdmin, setEsAdmin] = useState(false);
 
   useEffect(() => {
-    cargarUsuarios();
+    obtenerUsuarios();
+    verificarRol();
   }, []);
 
-  const cargarUsuarios = async () => {
+  const obtenerUsuarios = async () => {
     try {
       const token = localStorage.getItem("token");
       const res = await api.get("/usuarios", {
@@ -25,22 +21,19 @@ export default function GestionUsuarios() {
       });
       setUsuarios(res.data || []);
     } catch (err) {
-      console.error("Error al cargar usuarios", err);
+      console.error("Error al cargar usuarios:", err);
     }
   };
 
-  const handleCrear = async (e) => {
-    e.preventDefault();
+  const verificarRol = async () => {
     try {
       const token = localStorage.getItem("token");
-      await api.post("/usuarios", formData, {
+      const res = await api.get("/auth/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setFormData({ nombre: "", email: "", telefono: "", rol: "cliente" });
-      setModalOpen(false);
-      cargarUsuarios();
+      setEsAdmin(res.data.rol === "admin");
     } catch (err) {
-      console.error("Error al crear usuario", err);
+      console.error("Error al verificar rol:", err);
     }
   };
 
@@ -50,9 +43,9 @@ export default function GestionUsuarios() {
       await api.delete(`/usuarios/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      cargarUsuarios();
+      obtenerUsuarios();
     } catch (err) {
-      console.error("Error al eliminar usuario", err);
+      console.error("Error al eliminar usuario:", err);
     }
   };
 
@@ -60,193 +53,288 @@ export default function GestionUsuarios() {
     u.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
+  const clientes = usuariosFiltrados.filter((u) => u.rol === "cliente");
+  const trabajadores = usuariosFiltrados.filter((u) => u.rol === "trabajador");
+  const admins = usuariosFiltrados.filter((u) => u.rol === "admin");
+
   return (
-    <PageWrapper>
+    <Wrapper>
       <Header>
-        <Title>👥 Gestión de Usuarios</Title>
-        <TopControls>
-          <SearchInput
-            type="text"
-            placeholder="Buscar usuario..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-          />
-          <MainButton onClick={() => setModalOpen(true)}>
-            ➕ Agregar Usuario
-          </MainButton>
-        </TopControls>
+        <h1>👥 Panel de Usuarios</h1>
+        <SearchBar
+          placeholder="Buscar por nombre..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+        />
       </Header>
 
-      <UserGrid>
-        {usuariosFiltrados.map((u) => (
-          <UserCard key={u.id}>
-            <UserInfo>
-              <strong>{u.nombre}</strong>
-              <small>{u.email}</small>
-              <span>{u.telefono}</span>
-              <RoleTag>{u.rol}</RoleTag>
-            </UserInfo>
-            <ButtonGroup>
-              <SmallButton $danger onClick={() => eliminarUsuario(u.id)}>
-                Eliminar
-              </SmallButton>
-            </ButtonGroup>
-          </UserCard>
+      <h2>🟦 Clientes</h2>
+      <Grid>
+        {clientes.map((user) => (
+          <Card key={user.id}>
+            <Avatar>{user.nombre.charAt(0).toUpperCase()}</Avatar>
+            <Info>
+              <h3>{user.nombre}</h3>
+              <p>RUT: {user.rut}-{user.dv}</p>
+              <RolTag $rol={user.rol}>{user.rol}</RolTag>
+            </Info>
+            <Buttons>
+              <DetailBtn onClick={() => setUsuarioActivo(user)}>👁 Detalle</DetailBtn>
+              <DeleteBtn onClick={() => eliminarUsuario(user.id)}>🗑 Eliminar</DeleteBtn>
+            </Buttons>
+          </Card>
         ))}
-      </UserGrid>
+      </Grid>
 
-      {modalOpen && (
-        <ModalOverlay>
-          <Modal>
-            <form onSubmit={handleCrear}>
-              <h2>Nuevo Usuario</h2>
-              <input
-                placeholder="Nombre"
-                value={formData.nombre}
-                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                required
-              />
-              <input
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-              />
-              <input
-                placeholder="Teléfono"
-                value={formData.telefono}
-                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                required
-              />
-              <select
-                value={formData.rol}
-                onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
-              >
-                <option value="cliente">Cliente</option>
-                <option value="trabajador">Trabajador</option>
-                <option value="administrador">Administrador</option>
-              </select>
-              <ModalActions>
-                <MainButton type="submit">Guardar</MainButton>
-                <SmallButton onClick={() => setModalOpen(false)}>Cancelar</SmallButton>
-              </ModalActions>
-            </form>
-          </Modal>
-        </ModalOverlay>
+      <h2>🟨 Trabajadores</h2>
+      <Grid>
+        {trabajadores.map((user) => (
+          <Card key={user.id}>
+            <Avatar>{user.nombre.charAt(0).toUpperCase()}</Avatar>
+            <Info>
+              <h3>{user.nombre}</h3>
+              <p>RUT: {user.rut}-{user.dv}</p>
+              <RolTag $rol={user.rol}>{user.rol}</RolTag>
+            </Info>
+            <Buttons>
+              <DetailBtn onClick={() => setUsuarioActivo(user)}>👁 Detalle</DetailBtn>
+              <DeleteBtn onClick={() => eliminarUsuario(user.id)}>🗑 Eliminar</DeleteBtn>
+            </Buttons>
+          </Card>
+        ))}
+      </Grid>
+
+      <h2>🟥 Administradores</h2>
+      <Grid>
+        {admins.map((user) => (
+          <Card key={user.id}>
+            <Avatar>{user.nombre.charAt(0).toUpperCase()}</Avatar>
+            <Info>
+              <h3>{user.nombre}</h3>
+              <p>RUT: {user.rut}-{user.dv}</p>
+              <RolTag $rol={user.rol}>{user.rol}</RolTag>
+            </Info>
+            <Buttons>
+              <DetailBtn onClick={() => setUsuarioActivo(user)}>👁 Detalle</DetailBtn>
+              <DeleteBtn onClick={() => eliminarUsuario(user.id)}>🗑 Eliminar</DeleteBtn>
+            </Buttons>
+          </Card>
+        ))}
+      </Grid>
+
+      {usuarioActivo && (
+        <Modal>
+          <ModalContent>
+            <h2>📄 Detalle de Usuario</h2>
+            <label>Nombre:</label>
+            <Input
+              value={usuarioActivo.nombre}
+              onChange={(e) => {
+                if (esAdmin) {
+                  setUsuarioActivo({ ...usuarioActivo, nombre: e.target.value });
+                }
+              }}
+              disabled={!esAdmin}
+            />
+            <label>Email:</label>
+            <Input
+              value={usuarioActivo.email}
+              onChange={(e) => {
+                if (esAdmin) {
+                  setUsuarioActivo({ ...usuarioActivo, email: e.target.value });
+                }
+              }}
+              disabled={!esAdmin}
+            />
+            <label>Teléfono:</label>
+            <Input
+              value={usuarioActivo.telefono}
+              onChange={(e) => {
+                if (esAdmin) {
+                  setUsuarioActivo({ ...usuarioActivo, telefono: e.target.value });
+                }
+              }}
+              disabled={!esAdmin}
+            />
+            <label>RUT:</label>
+            <Input value={`${usuarioActivo.rut}-${usuarioActivo.dv}`} disabled />
+
+            <label>Rol:</label>
+            <Input value={usuarioActivo.rol} disabled />
+
+            <ModalButtons>
+              <CloseBtn onClick={() => setUsuarioActivo(null)}>Cerrar</CloseBtn>
+              {esAdmin && (
+                <SaveBtn
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem("token");
+                      await api.put(`/usuarios/${usuarioActivo.id}`, usuarioActivo, {
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      setUsuarioActivo(null);
+                      obtenerUsuarios();
+                    } catch (err) {
+                      console.error("Error al actualizar usuario:", err);
+                    }
+                  }}
+                >
+                  💾 Guardar
+                </SaveBtn>
+              )}
+            </ModalButtons>
+          </ModalContent>
+        </Modal>
       )}
-    </PageWrapper>
+    </Wrapper>
   );
 }
 
-// ESTILOS
+// -------------------- ESTILOS --------------------
 
-const PageWrapper = styled.div`
+const Wrapper = styled.div`
   padding: 2rem;
-  background-color: #f4f6f8;
+  background: #0f172a;
+  color: #f8fafc;
   min-height: 100vh;
 `;
 
 const Header = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   margin-bottom: 2rem;
 `;
 
-const Title = styled.h1`
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-  color: #222;
-`;
-
-const TopControls = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: space-between;
-`;
-
-const SearchInput = styled.input`
-  flex: 1;
-  min-width: 250px;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-`;
-
-const MainButton = styled.button`
-  background-color: #0d6efd;
-  color: white;
+const SearchBar = styled.input`
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
   border: none;
-  padding: 0.75rem 1.2rem;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-`;
-
-const SmallButton = styled.button`
-  background-color: ${({ $danger }) => ($danger ? "#dc3545" : "#6c757d")};
+  background: #1e293b;
   color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
 `;
 
-const UserGrid = styled.div`
+const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: 1.5rem;
 `;
 
-const UserCard = styled.div`
-  background: #fff;
-  border-radius: 12px;
-  padding: 1.2rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+const Card = styled.div`
+  background: #1e293b;
+  padding: 1.5rem;
+  border-radius: 14px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  text-align: center;
 `;
 
-const UserInfo = styled.div`
+const Avatar = styled.div`
+  background: #0ea5e9;
+  color: white;
+  font-size: 2rem;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 `;
 
-const RoleTag = styled.span`
-  margin-top: 0.5rem;
+const Info = styled.div`
+  margin-top: 1rem;
+  p {
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    margin: 0.3rem 0;
+  }
+`;
+
+const RolTag = styled.span`
+  padding: 0.3rem 0.6rem;
+  border-radius: 10px;
   font-size: 0.8rem;
-  color: #555;
-  background: #e7f1ff;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  width: fit-content;
+  color: white;
+  background: ${({ $rol }) =>
+    $rol === "admin" ? "#10b981" : $rol === "trabajador" ? "#f59e0b" : "#3b82f6"};
 `;
 
-const ButtonGroup = styled.div`
+const Buttons = styled.div`
   margin-top: 1rem;
   display: flex;
-  justify-content: flex-end;
+  gap: 0.5rem;
 `;
 
-const ModalOverlay = styled.div`
+const DeleteBtn = styled.button`
+  background: #ef4444;
+  border: none;
+  padding: 0.5rem 1rem;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+`;
+
+const DetailBtn = styled.button`
+  background: #3b82f6;
+  border: none;
+  padding: 0.5rem 1rem;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+`;
+
+const Modal = styled.div`
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
 `;
 
-const Modal = styled.div`
-  background: white;
+const ModalContent = styled.div`
+  background: #1e293b;
   padding: 2rem;
   border-radius: 12px;
-  width: 100%;
-  max-width: 400px;
+  width: 90%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 `;
 
-const ModalActions = styled.div`
+const Input = styled.input`
+  background: #334155;
+  border: none;
+  padding: 0.7rem;
+  border-radius: 8px;
+  color: white;
+`;
+
+const ModalButtons = styled.div`
   display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
+  justify-content: flex-end;
+  gap: 1rem;
+`;
+
+const CloseBtn = styled.button`
+  background: gray;
+  padding: 0.5rem 1rem;
+  border: none;
+  color: white;
+  border-radius: 8px;
+`;
+
+const SaveBtn = styled.button`
+  background: #10b981;
+  padding: 0.5rem 1rem;
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
 `;

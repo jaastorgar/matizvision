@@ -1,227 +1,221 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
 import api from "../api/axiosConfig";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Link } from "react-router-dom";
 
-function Lentes() {
+const Banner = styled.section`
+  height: 60vh;
+  background-image: url("https://images.unsplash.com/photo-1606813902499-17377f28b9c4");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+`;
+
+const BannerOverlay = styled.div`
+  background-color: rgba(0, 0, 0, 0.6);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: white;
+  text-align: center;
+  padding: 0 20px;
+`;
+
+const Title = styled.h1`
+  font-size: 2.8rem;
+  margin-bottom: 10px;
+`;
+
+const Subtitle = styled.p`
+  font-size: 1.2rem;
+  max-width: 700px;
+`;
+
+const Container = styled.div`
+  max-width: 1200px;
+  margin: auto;
+  padding: 50px 20px;
+`;
+
+const Filters = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+`;
+
+const Input = styled.input`
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 260px;
+`;
+
+const Select = styled.select`
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+`;
+
+const Grid = styled.div`
+  display: grid;
+  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+`;
+
+const Card = styled.div`
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  overflow: hidden;
+`;
+
+const ProductImage = styled.div`
+  height: 200px;
+  background: ${({ src }) => `url(${src}) center / cover no-repeat`};
+`;
+
+const Info = styled.div`
+  padding: 20px;
+  text-align: center;
+`;
+
+const Name = styled.h3`
+  margin-bottom: 10px;
+`;
+
+const Price = styled.p`
+  color: #0d9488;
+  font-weight: bold;
+`;
+
+const Stock = styled.p`
+  margin: 10px 0;
+  color: ${({ agotado }) => (agotado ? "#ef4444" : "#64748b")};
+`;
+
+const Button = styled.button`
+  background-color: ${({ disabled }) => (disabled ? "#ccc" : "#0d9488")};
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${({ disabled }) => (disabled ? "#ccc" : "#0f766e")};
+  }
+`;
+
+const Lentes = () => {
   const [productos, setProductos] = useState([]);
-  const [filtro, setFiltro] = useState("");
-  const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
+  const [stockFilter, setStockFilter] = useState("todos");
+  const [precioFilter, setPrecioFilter] = useState("todos");
 
   useEffect(() => {
-    const fetchProductos = async () => {
-      try {
-        const response = await api.get("/products");
-        setProductos(response.data);
-      } catch (error) {
-        console.error("❌ Error al obtener productos:", error);
-      }
-    };
-
-    fetchProductos();
+    api
+      .get("/products")
+      .then((res) => setProductos(res.data))
+      .catch((err) => console.error("Error al obtener productos:", err));
   }, []);
 
-  const productosFiltrados = productos.filter((p) =>
-    p.nombre.toLowerCase().includes(filtro.toLowerCase())
-  );
+  const handleAgregar = (producto) => {
+    const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+    const existente = carrito.find((item) => item.id === producto.id);
+    const cantidad = existente ? existente.cantidad + 1 : 1;
+
+    if (cantidad > producto.stock) {
+      alert("No hay suficiente stock disponible.");
+      return;
+    }
+
+    const actualizado = existente
+      ? carrito.map((p) =>
+          p.id === producto.id ? { ...p, cantidad } : p
+        )
+      : [...carrito, { ...producto, cantidad: 1 }];
+
+    localStorage.setItem("carrito", JSON.stringify(actualizado));
+    alert("Producto añadido al carrito.");
+  };
+
+  const productosFiltrados = productos.filter((p) => {
+    const matchNombre = p.nombre.toLowerCase().includes(busqueda.toLowerCase());
+    const matchStock =
+      stockFilter === "todos" ||
+      (stockFilter === "disponibles" && p.stock > 0) ||
+      (stockFilter === "agotados" && p.stock === 0);
+    const matchPrecio =
+      precioFilter === "todos" ||
+      (precioFilter === "bajo" && p.precio < 20000) ||
+      (precioFilter === "medio" && p.precio >= 20000 && p.precio <= 40000) ||
+      (precioFilter === "alto" && p.precio > 40000);
+
+    return matchNombre && matchStock && matchPrecio;
+  });
 
   return (
     <>
       <Navbar />
-      <div className="lentes-hero">
-        <div className="lentes-overlay" />
-        <div className="lentes-hero-content">
-          <h1>Explora nuestra colección de lentes</h1>
-          <p>Estilo y visión para todos los días</p>
-          <input
-            type="text"
-            placeholder="Buscar por nombre o estilo"
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
+      <Banner>
+        <BannerOverlay>
+          <Title>Descubre los Lentes Perfectos</Title>
+          <Subtitle>
+            Filtra por estilo, stock o precio. ¡Encuentra el ideal para ti!
+          </Subtitle>
+        </BannerOverlay>
+      </Banner>
+
+      <Container>
+        <Filters>
+          <Input
+            placeholder="Buscar por nombre..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
           />
-        </div>
-      </div>
+          <Select onChange={(e) => setStockFilter(e.target.value)}>
+            <option value="todos">Todos</option>
+            <option value="disponibles">Disponibles</option>
+            <option value="agotados">Agotados</option>
+          </Select>
+          <Select onChange={(e) => setPrecioFilter(e.target.value)}>
+            <option value="todos">Precio</option>
+            <option value="bajo">Menos de $20.000</option>
+            <option value="medio">$20.000 - $40.000</option>
+            <option value="alto">Más de $40.000</option>
+          </Select>
+        </Filters>
 
-      <div className="lentes-main">
-        <aside className={`lentes-sidebar ${mostrarFiltros ? "activo" : ""}`}>
-          <h3>Filtros</h3>
-          <label><input type="checkbox" /> Lentes de Sol</label>
-          <label><input type="checkbox" /> Lentes Recetados</label>
-          <label><input type="checkbox" /> Hombre</label>
-          <label><input type="checkbox" /> Mujer</label>
-        </aside>
-
-        <section className="lentes-productos">
-          <div className="lentes-toggle" onClick={() => setMostrarFiltros(!mostrarFiltros)}>
-            {mostrarFiltros ? "✖ Ocultar filtros" : "🔍 Mostrar filtros"}
-          </div>
-
-          <div className="lentes-grid">
-            {productosFiltrados.length === 0 ? (
-              <p className="lentes-vacio">No se encontraron productos.</p>
-            ) : (
-              productosFiltrados.map((producto) => (
-                <div key={producto.id} className="lentes-card">
-                  <Link to={`/producto/${producto.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                    <img
-                      src={`http://localhost:5000/uploads/${producto.imagen}`}
-                      alt={producto.nombre}
-                    />
-                    <h4>{producto.nombre}</h4>
-                    <p className="precio">${producto.precio}</p>
-                    <p className="ver-mas">Ver más ➜</p>
-                  </Link>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-      </div>
-
+        <Grid>
+          {productosFiltrados.map((p) => (
+            <Card key={p.id}>
+              <ProductImage src={p.imagen || "https://via.placeholder.com/300"} />
+              <Info>
+                <Name>{p.nombre}</Name>
+                <Price>${p.precio.toLocaleString()} CLP</Price>
+                <Stock agotado={p.stock === 0}>
+                  {p.stock === 0 ? "Producto agotado" : `Stock: ${p.stock}`}
+                </Stock>
+                <Button
+                  disabled={p.stock === 0}
+                  onClick={() => handleAgregar(p)}
+                >
+                  {p.stock === 0 ? "Agotado" : "Añadir al carrito"}
+                </Button>
+              </Info>
+            </Card>
+          ))}
+        </Grid>
+      </Container>
       <Footer />
-
-      {/* Estilos CSS embebidos */}
-      <style>{`
-        .lentes-hero {
-          background: url('https://images.unsplash.com/photo-1504196606672-aef5c9cefc92') center/cover no-repeat;
-          height: 60vh;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .lentes-overlay {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.5);
-          z-index: 1;
-        }
-
-        .lentes-hero-content {
-          color: white;
-          text-align: center;
-          z-index: 2;
-        }
-
-        .lentes-hero-content h1 {
-          font-size: 3rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .lentes-hero-content p {
-          font-size: 1.2rem;
-          margin-bottom: 1rem;
-        }
-
-        .lentes-hero-content input {
-          padding: 0.6rem 1rem;
-          width: 80%;
-          max-width: 400px;
-          border-radius: 8px;
-          border: none;
-        }
-
-        .lentes-main {
-          display: flex;
-          padding: 2rem;
-          gap: 2rem;
-          flex-wrap: wrap;
-        }
-
-        .lentes-sidebar {
-          min-width: 200px;
-          background: #f1f1f1;
-          padding: 1rem;
-          border-radius: 10px;
-          display: none;
-        }
-
-        .lentes-sidebar.activo {
-          display: block;
-        }
-
-        .lentes-sidebar h3 {
-          margin-bottom: 1rem;
-        }
-
-        .lentes-sidebar label {
-          display: block;
-          margin-bottom: 0.5rem;
-        }
-
-        .lentes-productos {
-          flex: 1;
-        }
-
-        .lentes-toggle {
-          cursor: pointer;
-          margin-bottom: 1rem;
-          font-weight: bold;
-        }
-
-        .lentes-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 1.5rem;
-        }
-
-        .lentes-card {
-          background: #fff;
-          border-radius: 12px;
-          padding: 1rem;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-          text-align: center;
-          transition: transform 0.3s;
-        }
-
-        .lentes-card:hover {
-          transform: translateY(-5px);
-        }
-
-        .lentes-card img {
-          max-width: 100%;
-          border-radius: 8px;
-          height: 180px;
-          object-fit: cover;
-        }
-
-        .lentes-card h4 {
-          margin: 0.8rem 0 0.3rem;
-        }
-
-        .precio {
-          color: #009688;
-          font-weight: bold;
-          margin-bottom: 0.5rem;
-        }
-
-        .ver-mas {
-          font-size: 0.9rem;
-          color: #2e7d32;
-          font-weight: bold;
-        }
-
-        .lentes-vacio {
-          font-style: italic;
-          text-align: center;
-          color: #777;
-        }
-
-        @media (max-width: 768px) {
-          .lentes-main {
-            flex-direction: column;
-          }
-
-          .lentes-sidebar {
-            width: 100%;
-          }
-        }
-      `}</style>
     </>
   );
-}
+};
 
 export default Lentes;

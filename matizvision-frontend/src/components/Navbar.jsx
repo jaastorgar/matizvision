@@ -113,7 +113,7 @@ const logoStyle = {
   height: "200px",
   width: "auto",
   position: "absolute",
-  top: "50%",
+  top: "42%",
   left: "10px",
   transform: "translateY(-50%)",
 };
