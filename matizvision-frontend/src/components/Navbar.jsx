@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "/matiz.png";
+import { FontSizeContext } from "../context/FontSizeContext";
 
 const Navbar = () => {
   const location = useLocation();
@@ -8,6 +9,7 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [carrito, setCarrito] = useState([]);
+  const { fontSize, increaseFont, decreaseFont, resetFont } = useContext(FontSizeContext);
 
   useEffect(() => {
     const checkUser = () => {
@@ -56,7 +58,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav style={navStyle}>
+    <nav style={{ ...navStyle, fontSize: `${fontSize}px` }}>
       <Link to="/" style={logoContainer}>
         <img src={logo} alt="Matiz Vision Logo" style={logoStyle} />
       </Link>
@@ -85,14 +87,21 @@ const Navbar = () => {
             )}
           </li>
         ) : (
-          <li><Link to="/login" style={{ color: "#ff9900", textDecoration: "none" }}>Iniciar Sesión</Link></li>
+          <li><Link to="/login" style={{ ...linkStyle, color: "#ff9900" }}>Iniciar Sesión</Link></li>
         )}
+
+        {/* 🔠 Controles de accesibilidad de tamaño de fuente */}
+        <li>
+          <button onClick={decreaseFont} style={fontControl}>A-</button>
+          <button onClick={resetFont} style={fontControl}>A</button>
+          <button onClick={increaseFont} style={fontControl}>A+</button>
+        </li>
       </ul>
     </nav>
   );
 };
 
-// ✅ Estilos
+// Estilos
 const navStyle = {
   backgroundColor: "#ffffff",
   color: "#0a0a1f",
@@ -123,6 +132,8 @@ const menuStyle = {
   display: "flex",
   gap: "20px",
   alignItems: "center",
+  margin: 0,
+  padding: 0,
 };
 
 const linkStyle = {
@@ -174,6 +185,16 @@ const logoutButton = {
   padding: "5px 10px",
   width: "100%",
   textAlign: "left",
+};
+
+const fontControl = {
+  fontSize: "16px",
+  padding: "4px 8px",
+  margin: "0 2px",
+  backgroundColor: "#eee",
+  border: "1px solid #ccc",
+  borderRadius: "4px",
+  cursor: "pointer",
 };
 
 export default Navbar;
